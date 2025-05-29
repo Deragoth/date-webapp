@@ -1,0 +1,100 @@
+name: Test Java JSP CI/CD
+
+on:
+  push:
+    branches: [ develop ]
+#  pull_request:
+#    branches: [ master ]
+  workflow_dispatch:
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configura JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build e Test con Maven
+        run: mvn clean package
+
+# Build diretto su Docker Hub senza passare da DockerHub che richiede i secret
+#      - name: Build e Push Docker image
+#        run: |
+#          docker build -t khamsin/date-webapp:latest .
+#          docker push khamsin/date-webapp:latest
+
+      - name: Check Docker Hub secrets
+        run: |
+          echo "=== Checking Docker Hub Secrets ==="
+          
+          # Verifica DOCKERHUB_USERNAME
+          if [ -n "$DOCKERHUB_USERNAME" ]; then
+            echo "✅ DOCKERHUB_USERNAME is set"
+            echo "Username length: ${#DOCKERHUB_USERNAME} characters"
+            echo "Username starts with: ${DOCKERHUB_USERNAME:0:3}..."
+          else
+            echo "❌ DOCKERHUB_USERNAME is NOT set"
+          fi
+          
+          # Se hai un token invece di password
+          if [ -n "$DOCKERHUB_TOKEN" ]; then
+            echo "✅ DOCKERHUB_TOKEN is set"
+            echo "Token length: ${#DOCKERHUB_TOKEN} characters"
+            echo "Token starts with: ${DOCKERHUB_TOKEN:0:3}..."
+          else
+            echo "❌ DOCKERHUB_TOKEN is NOT set"
+          fi
+          
+          echo "=== Debug complete ==="
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Test Docker Hub connection (without actual login)
+        run: |
+          echo "=== Testing Docker Hub connectivity ==="
+          
+          # Test se Docker Hub è raggiungibile
+          if curl -s https://hub.docker.com > /dev/null; then
+            echo "✅ Docker Hub is reachable"
+          else
+            echo "❌ Cannot reach Docker Hub"
+          fi
+          
+          # Verifica il formato username (se esiste)
+          if [ -n "$DOCKERHUB_USERNAME" ]; then
+            if [[ "$DOCKERHUB_USERNAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+              echo "✅ Username format looks valid"
+            else
+              echo "⚠️ Username contains unusual characters"
+            fi
+          fi
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+# Build su Docker Hub con secret da configurare se l'accesso a DockerHub è Pro
+      - name: Login su Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Costruisci e pubblica immagine Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: khamsin/date-webapp:latest
+
+#      - name: Deploy su Docker Desktop
+#        run: |
+#          docker pull khamsin/date-webapp:latest
+#          docker stop jsp-app || true
+#          docker rm jsp-app || true
+#          docker run -d -p 8080:8080 --name jsp-app khamsin/date-webapp:latest

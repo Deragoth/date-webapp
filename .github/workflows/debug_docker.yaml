@@ -1,0 +1,56 @@
+name: Debug Docker Hub Secrets
+on:
+  workflow_dispatch:  # Trigger manuale per il debug
+
+jobs:
+  debug-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Docker Hub secrets
+        run: |
+          echo "=== Checking Docker Hub Secrets ==="
+          
+          # Verifica DOCKER_HUB_USERNAME
+          if [ -n "$DOCKER_HUB_USERNAME" ]; then
+            echo "✅ DOCKER_HUB_USERNAME is set"
+            echo "Username length: ${#DOCKER_HUB_USERNAME} characters"
+            echo "Username starts with: ${DOCKER_HUB_USERNAME:0:3}..."
+          else
+            echo "❌ DOCKER_HUB_USERNAME is NOT set"
+          fi
+          
+          # Se hai un token invece di password
+          if [ -n "$DOCKER_HUB_TOKEN" ]; then
+            echo "✅ DOCKER_HUB_TOKEN is set"
+            echo "Token length: ${#DOCKER_HUB_TOKEN} characters"
+            echo "Token starts with: ${DOCKER_HUB_TOKEN:0:3}..."
+          else
+            echo "❌ DOCKER_HUB_TOKEN is NOT set"
+          fi
+          
+          echo "=== Debug complete ==="
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Test Docker Hub connection (without actual login)
+        run: |
+          echo "=== Testing Docker Hub connectivity ==="
+          
+          # Test se Docker Hub è raggiungibile
+          if curl -s https://hub.docker.com > /dev/null; then
+            echo "✅ Docker Hub is reachable"
+          else
+            echo "❌ Cannot reach Docker Hub"
+          fi
+          
+          # Verifica il formato username (se esiste)
+          if [ -n "$DOCKER_HUB_USERNAME" ]; then
+            if [[ "$DOCKER_HUB_USERNAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+              echo "✅ Username format looks valid"
+            else
+              echo "⚠️ Username contains unusual characters"
+            fi
+          fi
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
