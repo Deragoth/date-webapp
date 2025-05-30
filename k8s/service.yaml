@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: date-webapp-service
+  namespace: ${KUBE_NAMESPACE}
+spec:
+  selector:
+    app: webapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
