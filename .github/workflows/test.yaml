@@ -188,8 +188,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Deploy to Kubernetes
         run: |
-          kubectl set image khamsin/date-webapp \
-            date-webapp=${{ secrets.DOCKER_HUB_USERNAME }}/date-webapp:${{ github.sha }} \
+          # Usa il nome completo dell'immagine direttamente
+          kubectl set image deployment/date-webapp-deployment \
+            date-webapp=khamsin/date-webapp:latest \
             --namespace=test-webapp
-          kubectl rollout status khamsin/date-webapp --namespace=test-webapp
-
+          kubectl rollout status deployment/date-webapp-deployment --namespace=test-webapp
