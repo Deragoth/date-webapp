@@ -55,12 +55,12 @@ jobs:
       # Upload dell'artifact (da vedere come
       # riusarlo nel docker
       #**********************************************
-      - name: Upload build artifact
+      - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-jar
-          path: target/*.war
-
+          name: date-webapp.war
+          path: target/date-webapp.war
+          retention-days: 1
 
   docker-build-push:
     needs: build-and-test  # Aspetta che i test passino prima di buildare Docker
@@ -71,6 +71,15 @@ jobs:
       # Checkout del codice per Docker
       #**********************************************
       - uses: actions/checkout@v4
+
+      #**********************************************
+      # Download del WAR buildato nel job precedente
+      #**********************************************
+      - name: Download WAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: date-webapp-war
+          path: target/
 
       #**********************************************
       # Check secrets Docker (da rimuovere)
