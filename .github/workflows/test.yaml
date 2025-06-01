@@ -191,14 +191,18 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
+          # Importa l'immagine in MicroK8s
+          docker save khamsin/date-webapp:latest > /tmp/date-webapp.tar
+          microk8s ctr image import /tmp/date-webapp.tar
+
           # Applica i manifest (se sono cambiati)
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          microk8s kubectl apply -f k8s/deployment.yaml
+          microk8s kubectl apply -f k8s/service.yaml
           
           # Aggiorna l'immagine del deployment
-          kubectl set image deployment/date-webapp-deployment \
+          microk8s kubectl set image deployment/date-webapp-deployment \
             webapp=khamsin/date-webapp:${{ github.sha }} \
             --namespace=test-webapp
           
           # Aspetta che il rollout sia completato
-          kubectl rollout status deployment/date-webapp-deployment --namespace=test-webapp
+          microk8s kubectl rollout status deployment/date-webapp-deployment --namespace=test-webapp
