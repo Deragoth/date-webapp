@@ -51,9 +51,26 @@ jobs:
       - name: Build App
         run: mvn clean package
 
+      #**********************************************
+      # Upload dell'artifact (da vedere come
+      # riusarlo nel docker
+      #**********************************************
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: target/*.war
+
+
   docker-build-push:
+    needs: build-and-test  # Aspetta che i test passino prima di buildare Docker
     runs-on: ubuntu-latest
     steps:
+
+      #**********************************************
+      # Checkout del codice per Docker
+      #**********************************************
+      - uses: actions/checkout@v4
 
       #**********************************************
       # Check secrets Docker (da rimuovere)
