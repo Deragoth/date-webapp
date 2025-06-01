@@ -7,12 +7,19 @@ on:
 #    branches: [ master ]
   workflow_dispatch:
 jobs:
-  build-test-deploy:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      #**********************************************
+      # Checkout del codice
+      #**********************************************
 
+      - uses: actions/checkout@v4
+
+      #**********************************************
+      # Imposta la JDK per l'app
+      #**********************************************
       - name: Configura JDK 17
         uses: actions/setup-java@v4
         with:
@@ -20,6 +27,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      #**********************************************
+      # Cache delle dipendenze Maven
+      #**********************************************
       - name: Cache local Maven repository
         uses: actions/cache@v4
         with:
@@ -28,42 +38,60 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      #**********************************************
+      # Test Applicazione
+      #**********************************************
       - name: Build e Test con Maven
+        run: mvn clean test
+
+      #**********************************************
+      # Preparazione/Package App
+      #**********************************************
+      - name: Build App
         run: mvn clean package
 
-# Build diretto su Docker Hub senza passare da DockerHub che richiede i secret
-#      - name: Build e Push Docker image
-#        run: |
-#          docker build -t khamsin/date-webapp:latest .
-#          docker push khamsin/date-webapp:latest
+  docker:
+    runs-on: ubuntu-latest
+    steps:
 
+      #**********************************************
+      # Check secrets Docker (da rimuovere)
+      #**********************************************
+      # Build diretto su Docker Hub senza passare da DOCKER_HUB che richiede i secret
+      #      - name: Build e Push Docker image
+      #        run: |
+      #          docker build -t khamsin/date-webapp:latest .
+      #          docker push khamsin/date-webapp:latest
       - name: Check Docker Hub secrets
         run: |
           echo "=== Checking Docker Hub Secrets ==="
           
-          # Verifica DOCKERHUB_USERNAME
-          if [ -n "$DOCKERHUB_USERNAME" ]; then
-            echo "✅ DOCKERHUB_USERNAME is set"
-            echo "Username length: ${#DOCKERHUB_USERNAME} characters"
-            echo "Username starts with: ${DOCKERHUB_USERNAME:0:3}..."
+          # Verifica DOCKER_HUB_USERNAME
+          if [ -n "$DOCKER_HUB_USERNAME" ]; then
+            echo "✅ DOCKER_HUB_USERNAME is set"
+            echo "Username length: ${#DOCKER_HUB_USERNAME} characters"
+            echo "Username starts with: ${DOCKER_HUB_USERNAME:0:3}..."
           else
-            echo "❌ DOCKERHUB_USERNAME is NOT set"
+            echo "❌ DOCKER_HUB_USERNAME is NOT set"
           fi
           
           # Se hai un token invece di password
-          if [ -n "$DOCKERHUB_TOKEN" ]; then
-            echo "✅ DOCKERHUB_TOKEN is set"
-            echo "Token length: ${#DOCKERHUB_TOKEN} characters"
-            echo "Token starts with: ${DOCKERHUB_TOKEN:0:3}..."
+          if [ -n "$DOCKER_HUB_TOKEN" ]; then
+            echo "✅ DOCKER_HUB_TOKEN is set"
+            echo "Token length: ${#DOCKER_HUB_TOKEN} characters"
+            echo "Token starts with: ${DOCKER_HUB_TOKEN:0:3}..."
           else
-            echo "❌ DOCKERHUB_TOKEN is NOT set"
+            echo "❌ DOCKER_HUB_TOKEN is NOT set"
           fi
           
           echo "=== Debug complete ==="
         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      #**********************************************
+      # Test Docker conn
+      #**********************************************
       - name: Test Docker Hub connection (without actual login)
         run: |
           echo "=== Testing Docker Hub connectivity ==="
@@ -76,25 +104,43 @@ jobs:
           fi
           
           # Verifica il formato username (se esiste)
-          if [ -n "$DOCKERHUB_USERNAME" ]; then
-            if [[ "$DOCKERHUB_USERNAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+          if [ -n "$DOCKER_HUB_USERNAME" ]; then
+            if [[ "$DOCKER_HUB_USERNAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
               echo "✅ Username format looks valid"
             else
               echo "⚠️ Username contains unusual characters"
             fi
           fi
         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
 
-# Build su Docker Hub con secret da configurare se l'accesso a DockerHub è Pro
-      - name: Login su Docker Hub
-        uses: docker/login-action@v2
+      #**********************************************
+      # Login Docker
+      #**********************************************
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
+          username: ${{ vars.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Costruisci e pubblica immagine Docker
-        uses: docker/build-push-action@v4
+      #**********************************************
+      # Setup QEMU (Emulatore per architetture
+      # diverse - amd64, arm, Raspberry)
+      #**********************************************
+      #- name: Set up QEMU
+      #  uses: docker/setup-qemu-action@v3
+
+      #**********************************************
+      # Setup buildx
+      #**********************************************
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      #**********************************************
+      # Build Image from Dockerfile and push
+      #**********************************************
+      - name: Build and push
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -106,3 +152,17 @@ jobs:
 #          docker stop jsp-app || true
 #          docker rm jsp-app || true
 #          docker run -d -p 8080:8080 --name jsp-app khamsin/date-webapp:latest
+
+  deploy-to-k8s:
+    needs: docker-build-push
+    runs-on: self-hosted  # Runner locale per accesso a Kubernetes
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/date-webapp \
+            date-webapp=${{ secrets.DOCKER_HUB_USERNAME }}/date-webapp:${{ github.sha }} \
+            --namespace=test-webapp
+          kubectl rollout status deployment/date-webapp --namespace=test-webapp
+
