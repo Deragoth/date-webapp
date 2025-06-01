@@ -195,7 +195,7 @@ jobs:
           
           # Aggiorna l'immagine del deployment
           kubectl set image deployment/date-webapp-deployment \
-            webapp=khamsin/date-webapp:${{ github.sha }} \
+            webapp=khamsin/date-webapp:latest \
             --namespace=test-webapp
           
           # Aspetta che il rollout sia completato
