@@ -1,4 +1,4 @@
-# Versione 1.0.0 del 01/06/2025
+# Versione 2.0.0 del 01/06/2025 - Ottimizzata per MicroK8s
 name: Test Java JSP CI/CD
 
 on:
@@ -7,6 +7,12 @@ on:
 #  pull_request:
 #    branches: [ master ]
   workflow_dispatch:
+
+env:
+  REGISTRY: localhost:32000
+  IMAGE_NAME: date-webapp
+  K8S_NAMESPACE: test-webapp
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -64,6 +70,9 @@ jobs:
 
   docker-build-push:
     needs: build-and-test  # Aspetta che i test passino prima di buildare Docker
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
     runs-on: ubuntu-latest
     steps:
 
@@ -80,66 +89,6 @@ jobs:
         with:
           name: date-webapp.war
           path: target/
-
-      #**********************************************
-      # Check secrets Docker (da rimuovere)
-      #**********************************************
-      # Build diretto su Docker Hub senza passare da DOCKER_HUB che richiede i secret
-      #      - name: Build e Push Docker image
-      #        run: |
-      #          docker build -t khamsin/date-webapp:latest .
-      #          docker push khamsin/date-webapp:latest
-      - name: Check Docker Hub secrets
-        run: |
-          echo "=== Checking Docker Hub Secrets ==="
-          
-          # Verifica DOCKER_HUB_USERNAME
-          if [ -n "$DOCKER_HUB_USERNAME" ]; then
-            echo "✅ DOCKER_HUB_USERNAME is set"
-            echo "Username length: ${#DOCKER_HUB_USERNAME} characters"
-            echo "Username starts with: ${DOCKER_HUB_USERNAME:0:3}..."
-          else
-            echo "❌ DOCKER_HUB_USERNAME is NOT set"
-          fi
-          
-          # Se hai un token invece di password
-          if [ -n "$DOCKER_HUB_TOKEN" ]; then
-            echo "✅ DOCKER_HUB_TOKEN is set"
-            echo "Token length: ${#DOCKER_HUB_TOKEN} characters"
-            echo "Token starts with: ${DOCKER_HUB_TOKEN:0:3}..."
-          else
-            echo "❌ DOCKER_HUB_TOKEN is NOT set"
-          fi
-          
-          echo "=== Debug complete ==="
-        env:
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      #**********************************************
-      # Test Docker conn
-      #**********************************************
-      - name: Test Docker Hub connection (without actual login)
-        run: |
-          echo "=== Testing Docker Hub connectivity ==="
-          
-          # Test se Docker Hub è raggiungibile
-          if curl -s https://hub.docker.com > /dev/null; then
-            echo "✅ Docker Hub is reachable"
-          else
-            echo "❌ Cannot reach Docker Hub"
-          fi
-          
-          # Verifica il formato username (se esiste)
-          if [ -n "$DOCKER_HUB_USERNAME" ]; then
-            if [[ "$DOCKER_HUB_USERNAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-              echo "✅ Username format looks valid"
-            else
-              echo "⚠️ Username contains unusual characters"
-            fi
-          fi
-        env:
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
 
       #**********************************************
       # Login Docker
@@ -163,6 +112,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: khamsin/date-webapp
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
       #**********************************************
       # Build Image from Dockerfile and push
       #**********************************************
@@ -174,35 +133,195 @@ jobs:
           tags: |
             khamsin/date-webapp:latest
             khamsin/date-webapp:${{ github.sha }}
-
-#      - name: Deploy su Docker Desktop
-#        run: |
-#          docker pull khamsin/date-webapp:latest
-#          docker stop jsp-app || true
-#          docker rm jsp-app || true
-#          docker run -d -p 8080:8080 --name jsp-app khamsin/date-webapp:latest
+          labels: ${{ steps.meta.outputs.labels }}
 
 
-  deploy-to-k8s:
+  deploy-to-microk8s:
     needs: docker-build-push
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to Kubernetes
+      # ============================================
+      # PRE-DEPLOYMENT CHECKS
+      # ============================================
+      - name: Verify MicroK8s Status
         run: |
-          # Importa l'immagine in MicroK8s
-          docker save khamsin/date-webapp:latest > /tmp/date-webapp.tar
-          microk8s ctr image import /tmp/date-webapp.tar
+          echo "🔍 Checking MicroK8s status..."
+          microk8s status --wait-ready --timeout 60
+          
+          echo "🔍 Checking registry availability..."
+          microk8s kubectl get service registry -n container-registry || {
+            echo "❌ Registry not enabled. Enabling..."
+            microk8s enable registry
+            microk8s status --wait-ready
+          }
 
-          # Applica i manifest (se sono cambiati)
-          microk8s kubectl apply -f k8s/deployment.yaml
-          microk8s kubectl apply -f k8s/service.yaml
+      - name: Verify Docker Configuration
+        run: |
+          echo "🔍 Checking Docker daemon configuration..."
+          if ! docker info | grep -q "localhost:32000"; then
+            echo "⚠️ Registry localhost:32000 not in insecure registries"
+            echo "Please add to /etc/docker/daemon.json"
+          fi
+
+      # ============================================
+      # IMAGE MANAGEMENT - BEST PRACTICE
+      # ============================================
+      - name: Pull and Push to Local Registry
+        run: |
+          echo "📥 Pulling image from Docker Hub..."
+          docker pull khamsin/date-webapp:${{ github.sha }}
+          
+          echo "🏷️ Tagging for local registry..."
+          docker tag khamsin/date-webapp:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker tag khamsin/date-webapp:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          
+          echo "📤 Pushing to MicroK8s registry..."
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          
+          echo "✅ Image successfully pushed to local registry"
+
+      # ============================================
+      # NAMESPACE MANAGEMENT
+      # ============================================
+      - name: Ensure Namespace Exists
+        run: |
+          echo "🔧 Creating/updating namespace..."
+          microk8s kubectl create namespace ${{ env.K8S_NAMESPACE }} \
+            --dry-run=client -o yaml | microk8s kubectl apply -f -
+
+      # ============================================
+      # MANIFEST VALIDATION
+      # ============================================
+      - name: Validate Kubernetes Manifests
+        run: |
+          echo "🔍 Validating manifests..."
+          
+          # Dry-run per validare i manifest
+          microk8s kubectl apply -f k8s/deployment.yaml --dry-run=client
+          microk8s kubectl apply -f k8s/service.yaml --dry-run=client
+          
+          echo "✅ Manifests are valid"
+
+      # ============================================
+      # DEPLOYMENT APPLICATION
+      # ============================================
+      - name: Apply Kubernetes Manifests
+        run: |
+          echo "📋 Applying Kubernetes manifests..."
+          
+          # Applica i manifest con annotazioni per tracking
+          microk8s kubectl apply -f k8s/deployment.yaml \
+            --namespace=${{ env.K8S_NAMESPACE }} \
+            --record
+          
+          microk8s kubectl apply -f k8s/service.yaml \
+            --namespace=${{ env.K8S_NAMESPACE }}
+          
+          echo "✅ Manifests applied successfully"
+
+      # ============================================
+      # IMAGE UPDATE - ZERO DOWNTIME
+      # ============================================
+      - name: Update Deployment Image
+        run: |
+          echo "🚀 Updating deployment with new image..."
           
           # Aggiorna l'immagine del deployment
           microk8s kubectl set image deployment/date-webapp-deployment \
-            webapp=khamsin/date-webapp:${{ github.sha }} \
-            --namespace=test-webapp
+            webapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --namespace=${{ env.K8S_NAMESPACE }} \
+            --record
           
-          # Aspetta che il rollout sia completato
-          microk8s kubectl rollout status deployment/date-webapp-deployment --namespace=test-webapp
+          # Annota il deployment con metadata del deploy
+          microk8s kubectl annotate deployment/date-webapp-deployment \
+            deployment.kubernetes.io/revision-history-limit=10 \
+            app.kubernetes.io/version=${{ github.sha }} \
+            app.kubernetes.io/deployed-by="github-actions" \
+            app.kubernetes.io/deployed-at="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --namespace=${{ env.K8S_NAMESPACE }} \
+            --overwrite
+
+      # ============================================
+      # ROLLOUT MONITORING - CRITICAL
+      # ============================================
+      - name: Wait for Rollout Completion
+        timeout-minutes: 10
+        run: |
+          echo "⏳ Waiting for rollout to complete..."
+          
+          # Aspetta il rollout con timeout
+          microk8s kubectl rollout status deployment/date-webapp-deployment \
+            --namespace=${{ env.K8S_NAMESPACE }} \
+            --timeout=600s
+          
+          echo "✅ Rollout completed successfully"
+
+      # ============================================
+      # POST-DEPLOYMENT VERIFICATION
+      # ============================================
+      - name: Verify Deployment Health
+        run: |
+          echo "🔍 Verifying deployment health..."
+          
+          # Verifica che i pod siano running
+          echo "📊 Pod Status:"
+          microk8s kubectl get pods -l app=date-webapp \
+            --namespace=${{ env.K8S_NAMESPACE }} \
+            -o wide
+          
+          # Verifica che il service sia attivo
+          echo "🌐 Service Status:"
+          microk8s kubectl get services \
+            --namespace=${{ env.K8S_NAMESPACE }}
+          
+          # Verifica deployment details
+          echo "🚀 Deployment Status:"
+          microk8s kubectl describe deployment/date-webapp-deployment \
+            --namespace=${{ env.K8S_NAMESPACE }}
+          
+          # Health check dei pod
+          echo "❤️ Pod Health Check:"
+          microk8s kubectl get pods -l app=date-webapp \
+            --namespace=${{ env.K8S_NAMESPACE }} \
+            -o jsonpath='{.items[*].status.phase}' | grep -q "Running" || {
+            echo "❌ Some pods are not running"
+            exit 1
+          }
+          
+          echo "✅ All verification checks passed"
+
+      # ============================================
+      # CLEANUP
+      # ============================================
+      - name: Cleanup Old Images
+        run: |
+          echo "🧹 Cleaning up old Docker images..."
+          
+          # Mantieni solo le ultime 3 versioni
+          docker images khamsin/date-webapp --format "table {{.Tag}}\t{{.ID}}" | \
+            tail -n +4 | head -n -3 | awk '{print \$2}' | \
+            xargs -r docker rmi || true
+          
+          # Cleanup delle immagini non utilizzate
+          docker system prune -f --filter "until=24h" || true
+          
+          echo "✅ Cleanup completed"
+
+      # ============================================
+      # ROLLBACK PREPARATION
+      # ============================================
+      - name: Prepare Rollback Information
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed. Preparing rollback..."
+          
+          # Mostra la storia dei rollout
+          microk8s kubectl rollout history deployment/date-webapp-deployment \
+            --namespace=${{ env.K8S_NAMESPACE }}
+          
+          # Comando per rollback manuale (se necessario)
+          echo "🔄 To rollback manually, run:"
+          echo "microk8s kubectl rollout undo deployment/date-webapp-deployment --namespace=${{ env.K8S_NAMESPACE }}"
