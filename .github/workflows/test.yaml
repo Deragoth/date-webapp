@@ -180,22 +180,23 @@ jobs:
 #          docker rm jsp-app || true
 #          docker run -d -p 8080:8080 --name jsp-app khamsin/date-webapp:latest
 
-deploy-to-k8s:
-  needs: docker-build-push
-  runs-on: self-hosted
-  steps:
-    - uses: actions/checkout@v4
 
-    - name: Deploy to Kubernetes
-      run: |
-        # Applica i manifest (se sono cambiati)
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
-        
-        # Aggiorna l'immagine del deployment
-        kubectl set image deployment/date-webapp-deployment \
-          webapp=khamsin/date-webapp:${{ github.sha }} \
-          --namespace=test-webapp
-        
-        # Aspetta che il rollout sia completato
-        kubectl rollout status deployment/date-webapp-deployment --namespace=test-webapp
+  deploy-to-k8s:
+    needs: docker-build-push
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Kubernetes
+        run: |
+          # Applica i manifest (se sono cambiati)
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          
+          # Aggiorna l'immagine del deployment
+          kubectl set image deployment/date-webapp-deployment \
+            webapp=khamsin/date-webapp:${{ github.sha }} \
+            --namespace=test-webapp
+          
+          # Aspetta che il rollout sia completato
+          kubectl rollout status deployment/date-webapp-deployment --namespace=test-webapp
