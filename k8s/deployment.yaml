@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: date-webapp-deployment
-  namespace: ${KUBE_NAMESPACE}
+  namespace: test-webapp
 spec:
   replicas: 2
   selector:
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: webapp
-          image: ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+          image: kamsin/date-webapp:latest
           ports:
             - containerPort: 8080
           resources:
