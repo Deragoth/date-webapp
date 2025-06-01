@@ -171,7 +171,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: khamsin/date-webapp:latest
+          tags: |
+            khamsin/date-webapp:latest
+            khamsin/date-webapp:${{ github.sha }}
 
 #      - name: Deploy su Docker Desktop
 #        run: |
@@ -195,7 +197,7 @@ jobs:
           
           # Aggiorna l'immagine del deployment
           kubectl set image deployment/date-webapp-deployment \
-            webapp=khamsin/date-webapp:latest \
+            webapp=khamsin/date-webapp:${{ github.sha }} \
             --namespace=test-webapp
           
           # Aspetta che il rollout sia completato
