@@ -28,6 +28,7 @@ spec:
         prometheus.io/port: "8080"
         prometheus.io/path: "/metrics"
     spec:
+      automountServiceAccountToken: false  # <- AGGIUNTO: disabilita automount
       containers:
         - name: webapp
           image: localhost:32000/date-webapp:latest
@@ -38,9 +39,11 @@ spec:
             requests:
               memory: "256Mi"
               cpu: "200m"
+              ephemeral-storage: "1Gi"    # per evitare riempimento
             limits:
               memory: "512Mi"
               cpu: "500m"
+              ephemeral-storage: "2Gi"    # per evitare riempimento
           livenessProbe:
             httpGet:
               path: /

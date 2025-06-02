@@ -15,7 +15,7 @@
 
         <%-- Utilizzo di Java direttamente nella JSP per mostrare la data di sistema sul server --%>
         <p>
-            Data di caricamento della pagina:
+            Data di caricamento della pagina - Versione 2:
             <%= LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) %>
         </p>
 
