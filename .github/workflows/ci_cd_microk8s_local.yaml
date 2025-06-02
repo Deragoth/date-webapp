@@ -27,7 +27,7 @@ jobs:
       #**********************************************
       # Imposta la JDK per l'app
       #**********************************************
-      - name: Configura JDK 17
+      - name: Setup JDK 17 con Maven cache
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -35,27 +35,15 @@ jobs:
           cache: maven
 
       #**********************************************
-      # Cache delle dipendenze Maven
+      # Test e Build Applicazione
       #**********************************************
-      - name: Cache local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      #**********************************************
-      # Test Applicazione
-      #**********************************************
-      - name: Build e Test con Maven
-        run: mvn clean test
-
-      #**********************************************
-      # Preparazione/Package App
-      #**********************************************
-      - name: Build App
-        run: mvn clean package
+      - name: Test, Build e Package con Maven
+        run: |
+          mvn clean compile test package \
+          -T 1C \
+          -Dmaven.test.redirectTestOutputToFile=true \
+          -Dmaven.javadoc.skip=true \
+          --batch-mode --show-version
 
       #**********************************************
       # Upload dell'artifact (da vedere come
@@ -64,16 +52,16 @@ jobs:
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: date-webapp.war
+          name: date-webapp-${{ github.sha }}
           path: target/date-webapp.war
           retention-days: 1
 
   docker-build-push:
-    needs: build-and-test  # Aspetta che i test passino prima di buildare Docker
-    outputs:
-      image-tag: ${{ steps.meta.outputs.tags }}
-      image-digest: ${{ steps.build.outputs.digest }}
+    needs: build-and-test                                   # Aspetta che i test passino prima di buildare Docker
     runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}             # variabile usata in step successivi
+      image-digest: ${{ steps.build.outputs.digest }}       # variabile usata in step successivi
     steps:
 
       #**********************************************
@@ -87,8 +75,17 @@ jobs:
       - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: date-webapp.war
+          name: date-webapp-${{ github.sha }}
           path: target/
+
+      #**********************************************
+      # Setup ottimizzato con cache registry
+      #**********************************************
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:buildx-stable-1
 
       #**********************************************
       # Login Docker
@@ -106,12 +103,6 @@ jobs:
       #- name: Set up QEMU
       #  uses: docker/setup-qemu-action@v3
 
-      #**********************************************
-      # Setup buildx
-      #**********************************************
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -119,7 +110,7 @@ jobs:
           images: khamsin/date-webapp
           tags: |
             type=ref,event=branch
-            type=sha,prefix={{branch}}-
+            type=sha,prefix={{branch}}-,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
       #**********************************************
@@ -130,11 +121,11 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            khamsin/date-webapp:latest
-            khamsin/date-webapp:${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
 
   deploy-to-microk8s:
     needs: docker-build-push
@@ -143,9 +134,9 @@ jobs:
       - uses: actions/checkout@v4
 
       # ============================================
-      # PRE-DEPLOYMENT CHECKS
+      # Controlli PRE-DEPLOYMENT
       # ============================================
-      - name: Verify MicroK8s Status
+      - name: Verifica lo stato di MicroK8s
         run: |
           echo "🔍 Checking MicroK8s status..."
           microk8s status --wait-ready --timeout 60
@@ -166,9 +157,9 @@ jobs:
           fi
 
       # ============================================
-      # IMAGE MANAGEMENT - BEST PRACTICE
+      # GESTIONE IMMAGINE
       # ============================================
-      - name: Pull and Push to Local Registry
+      - name: Pull e Push nel Registry Locale
         run: |
           echo "📥 Pulling image from Docker Hub..."
           docker pull khamsin/date-webapp:${{ github.sha }}
@@ -184,18 +175,18 @@ jobs:
           echo "✅ Image successfully pushed to local registry"
 
       # ============================================
-      # NAMESPACE MANAGEMENT
+      # SET DEL NAMESPACE SPECIFICO
       # ============================================
-      - name: Ensure Namespace Exists
+      - name: Verifica esistenza Namespace
         run: |
           echo "🔧 Creating/updating namespace..."
           microk8s kubectl create namespace ${{ env.K8S_NAMESPACE }} \
             --dry-run=client -o yaml | microk8s kubectl apply -f -
 
       # ============================================
-      # MANIFEST VALIDATION
+      # VALIDAZIONE FILE YAML PER K8S
       # ============================================
-      - name: Validate Kubernetes Manifests
+      - name: Validazione dei Manifest Kubernetes
         run: |
           echo "🔍 Validating manifests..."
           
@@ -208,7 +199,7 @@ jobs:
           echo "✅ Manifests are valid"
 
       # ============================================
-      # DEPLOYMENT APPLICATION
+      # APPLICAZIONE DEPLOYMENT
       # ============================================
       - name: Apply Kubernetes Manifests
         run: |
@@ -231,7 +222,7 @@ jobs:
           echo "✅ Manifests applied successfully"
 
       # ============================================
-      # IMAGE UPDATE - ZERO DOWNTIME
+      # AGGIORNAMENTO IMMAGINE - ZERO DOWNTIME
       # ============================================
       - name: Update Deployment Image
         run: |
@@ -253,7 +244,7 @@ jobs:
             --overwrite
 
       # ============================================
-      # ROLLOUT MONITORING - CRITICAL
+      # MONITORAGGIO ROLLOUT - CRITICO
       # ============================================
       - name: Wait for Rollout Completion
         timeout-minutes: 10
@@ -268,7 +259,7 @@ jobs:
           echo "✅ Rollout completed successfully"
 
       # ============================================
-      # POST-DEPLOYMENT VERIFICATION
+      # VERIFICA POST-DEPLOYMENT
       # ============================================
       - name: Verify Deployment Health
         run: |
@@ -302,7 +293,7 @@ jobs:
           echo "✅ All verification checks passed"
 
       # ============================================
-      # CLEANUP
+      # PULIZIA IMMAGINI
       # ============================================
       - name: Cleanup Old Images
         run: |
@@ -319,7 +310,8 @@ jobs:
           echo "✅ Cleanup completed"
 
       # ============================================
-      # ROLLBACK PREPARATION
+      # PREPARAZIONE ROLLBACK
+      # Se vanno in fallimento i deploy
       # ============================================
       - name: Prepare Rollback Information
         if: failure()
