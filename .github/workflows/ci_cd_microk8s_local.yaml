@@ -1,4 +1,13 @@
+############################################################
 # Versione 2.0.0 del 01/06/2025 - Ottimizzata per MicroK8s
+#
+# Accedere all'app: http://wsl.local:30080/
+#
+# wsl.local creato da Ingress, viene mappato su W11
+#           C:\Windows\System32\drivers\etc\hosts:
+#           # Added for WSL2 - accesso alla sottorete Ubuntu
+#           172.23.213.88 wsl.local
+############################################################
 name: Test Java JSP CI/CD
 
 on:
