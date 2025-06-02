@@ -25,6 +25,7 @@ RUN chmod +x "${CATALINA_HOME}"/bin/*.sh
 RUN groupadd -g 1001 tomcat && \
     useradd -r -u 1001 -g tomcat -s /bin/bash -d /usr/local/tomcat tomcat && \
     chown -R tomcat:tomcat "${CATALINA_HOME}" \
+
 USER tomcat
 
 # Espone la porta standard
