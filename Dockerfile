@@ -24,7 +24,7 @@ RUN chmod +x "${CATALINA_HOME}"/bin/*.sh
 #comandi specifici per Ubuntu
 RUN groupadd -g 1001 tomcat && \
     useradd -r -u 1001 -g tomcat -s /bin/bash -d /usr/local/tomcat tomcat && \
-    chown -R tomcat:tomcat "${CATALINA_HOME}" \
+    chown -R tomcat:tomcat "${CATALINA_HOME}"
 
 USER tomcat
 
