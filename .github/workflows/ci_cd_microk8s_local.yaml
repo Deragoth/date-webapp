@@ -141,12 +141,12 @@ jobs:
       #**********************************************
       # Verifica vulnerabilità CVE con Trivy
       #**********************************************
-#      - name: Run Trivy for CVE
-#        uses: aquasecurity/trivy-action@master
-#        with:
-#          image-ref: 'khamsin/date-webapp:${{ github.sha }}'
-#          format: 'table'
-#          exit-code: '0'
+      - name: Run Trivy for CVE
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'khamsin/date-webapp:${{ github.sha }}'
+          format: 'table'
+          exit-code: '0'
 
   deploy-to-microk8s:
     needs: docker-build-push
