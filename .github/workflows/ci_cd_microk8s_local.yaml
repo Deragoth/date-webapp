@@ -138,6 +138,16 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
+      #**********************************************
+      # Verifica vulnerabilità CVE con Trivy
+      #**********************************************
+      - name: Run Trivy for CVE
+        uses: aquasecurity/trivy-action@v6
+        with:
+          image-ref: 'khamsin/date-webapp:${{ github.sha }}'
+          format: 'table'
+          exit-code: '0'
+
   deploy-to-microk8s:
     needs: docker-build-push
     runs-on: self-hosted
