@@ -214,7 +214,6 @@ jobs:
           # Dry-run per validare i manifest
           microk8s kubectl apply -f k8s/deployment.yaml --dry-run=client
           microk8s kubectl apply -f k8s/service-cluster.yaml --dry-run=client
-          microk8s kubectl apply -f k8s/service-nodePort.yaml --dry-run=client
           microk8s kubectl apply -f k8s/ingress.yaml --dry-run=client
           
           echo "✅ Manifests are valid"
@@ -229,7 +228,6 @@ jobs:
           # Applica e rimuove  i manifest 
           microk8s kubectl delete -f k8s/deployment.yaml --namespace=${{ env.K8S_NAMESPACE }} || true 
           microk8s kubectl delete -f k8s/service-cluster.yaml --namespace=${{ env.K8S_NAMESPACE }}  || true
-          microk8s kubectl delete -f k8s/service-nodePort.yaml --namespace=${{ env.K8S_NAMESPACE }}  || true
           microk8s kubectl delete -f k8s/ingress.yaml --namespace=${{ env.K8S_NAMESPACE }}  || true
 
       # ============================================
@@ -245,9 +243,6 @@ jobs:
             --record
           
           microk8s kubectl apply -f k8s/service-cluster.yaml \
-            --namespace=${{ env.K8S_NAMESPACE }}
-          
-          microk8s kubectl apply -f k8s/service-nodePort.yaml \
             --namespace=${{ env.K8S_NAMESPACE }}
           
           microk8s kubectl apply -f k8s/ingress.yaml \
