@@ -220,6 +220,19 @@ jobs:
           echo "✅ Manifests are valid"
 
       # ============================================
+      # PULIZIA INIZIALE
+      # ============================================
+      - name: Clean Kubernetes Manifests
+        run: |
+          echo "📋 Cleaning Kubernetes manifests..."
+          
+          # Applica e rimuove  i manifest 
+          microk8s kubectl delete -f k8s/deployment.yaml --namespace=${{ env.K8S_NAMESPACE }} 
+          microk8s kubectl delete -f k8s/service-cluster.yaml --namespace=${{ env.K8S_NAMESPACE }} 
+          microk8s kubectl delete -f k8s/service-nodePort.yaml --namespace=${{ env.K8S_NAMESPACE }} 
+          microk8s kubectl delete -f k8s/ingress.yaml --namespace=${{ env.K8S_NAMESPACE }} 
+
+      # ============================================
       # APPLICAZIONE DEPLOYMENT
       # ============================================
       - name: Apply Kubernetes Manifests
@@ -346,3 +359,4 @@ jobs:
           # Comando per rollback manuale (se necessario)
           echo "🔄 To rollback manually, run:"
           echo "microk8s kubectl rollout undo deployment/date-webapp-deployment --namespace=${{ env.K8S_NAMESPACE }}"
+
