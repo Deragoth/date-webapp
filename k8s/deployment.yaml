@@ -35,6 +35,10 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          securityContext:
+            runAsUser: 1001          # UID dell'utente Tomcat
+            runAsGroup: 1001         # GID dell'utente Tomcat
+            fsGroup: 1001            # GID per garantire l'accesso al volume
           # Aggiunta volume
           volumeMounts:
             - name: txt-volume
