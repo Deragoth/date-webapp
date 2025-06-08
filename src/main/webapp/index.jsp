@@ -26,7 +26,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Applicazione Data - Ambiente: ${System.getenv("ENVIRONMENT") != null ? System.getenv("ENVIRONMENT") : "Non configurato"}</h1>
+        <h1>Applicazione Data - Ambiente: nullo</h1>
         <p>Data di caricamento della pagina - Versione 5:</p>
         <p>
             Data di caricamento della pagina - Versione 5:
