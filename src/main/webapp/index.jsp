@@ -23,7 +23,7 @@
         <div id="result"></div>
 
         <!-- Form per scrivere testo nel file -->
-        <form method="post" action="FileHandlerServlet">
+        <form method="post" action="home">
             <label for="inputText">Inserisci del testo:</label><br>
             <input type="text" id="inputText" name="textInput" required placeholder="Scrivi qualcosa..."><br><br>
             <button type="submit">Scrivi nel file</button>
