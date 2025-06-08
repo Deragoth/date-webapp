@@ -59,7 +59,9 @@
                     <td><%= value.length() > 100 ? value.substring(0, 100) + "..." : value %></td>
                 </tr>
             <%
-
+                    }
+                }
+            %>
             </tbody>
         </table>
 
