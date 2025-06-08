@@ -30,6 +30,12 @@
         </form>
 
         <!-- Mostra il contenuto del file -->
+        <%
+            Object debugFileContent = request.getAttribute("fileContent");
+            System.out.println("Controllo JSP: fileContent = " + debugFileContent);
+        %>
+        <p><b>Debug contenuto fileContent:</b> <%=debugFileContent%></p>
+
         <h2>Contenuto del file:</h2>
         <div id="fileContent">
             <c:choose>
