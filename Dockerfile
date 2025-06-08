@@ -13,11 +13,6 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 ENV CATALINA_HOME=/usr/local/tomcat
 ENV PATH=$CATALINA_HOME/bin:$PATH
 
-# Aggiunge un argomento di build per l'ambiente configurabile
-ARG ENVIRONMENT=development
-ENV ENVIRONMENT=${ENVIRONMENT}
-# Copia i file delle properties specifici dell'ambiente
-COPY env/${ENVIRONMENT}/env.properties /opt/app/config/env.properties
 
 # Copia il WAR nella cartella webapps come ROOT.war
 COPY target/date-webapp.war /usr/local/tomcat/webapps/ROOT.war
@@ -31,12 +26,6 @@ RUN groupadd -g 1001 tomcat && \
     useradd -r -u 1001 -g tomcat -s /bin/bash -d /usr/local/tomcat tomcat && \
     chown -R tomcat:tomcat "${CATALINA_HOME}"
 
-# Copia l'entrypoint script
-COPY env/entrypoint.sh /usr/local/bin/
-
-RUN chmod +x /usr/local/bin/entrypoint.sh && \
-    chown tomcat:tomcat /usr/local/bin/entrypoint.sh
-
 USER tomcat
 
 # Espone la porta standard
@@ -48,5 +37,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 
 # Avvia Tomcat
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["catalina.sh", "run"]

@@ -16,16 +16,6 @@ on:
 #  pull_request:
 #    branches: [ master ]
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Seleziona ambiente di destinazione'
-        required: true
-        default: 'development'
-        type: choice
-        options:
-          - development
-          - staging
-          - production
 
 env:
   REGISTRY: localhost:32000
@@ -82,28 +72,6 @@ jobs:
       image-tag: ${{ steps.meta.outputs.tags }}             # variabile usata in step successivi
       image-digest: ${{ steps.build.outputs.digest }}       # variabile usata in step successivi
     steps:
-
-      #*****************************************************
-      # Step per configurare l'ambiente basato sul branch
-      #*****************************************************
-      - name: Step predefined ENVIRONMENT
-        id: setup-env
-        run: |
-          # Controlla se il workflow è stato avviato manualmente
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "Ambiente impostato manualmente: ${{ github.event.inputs.environment }}"
-            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-          else
-            # Imposta l'ambiente in base al branch
-            REF=${{ github.ref }}
-            if [[ "$REF" == "refs/heads/main" ]]; then
-              echo "environment=development" >> $GITHUB_ENV
-            elif [[ "$REF" == "refs/heads/staging" ]]; then
-              echo "environment=staging" >> $GITHUB_ENV
-            else
-              echo "environment=development" >> $GITHUB_ENV
-            fi
-          fi
 
       #**********************************************
       # Checkout del codice per Docker
@@ -169,10 +137,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
-          # passa i parametri al Dockerfile
-          build-args: |
-            ENVIRONMENT=${{ env.environment }}
-          # ENVIRONMENT=${{ github.event.inputs.environment }}
 
       #**********************************************
       # Verifica vulnerabilità CVE con Trivy
@@ -311,16 +275,8 @@ jobs:
       # ============================================
       # MONITORAGGIO ROLLOUT - CRITICO
       # ============================================
-      - name: Quick Health Check
-        run: |
-          # Controlla se il deployment esiste ed è già pronto
-          if microk8s kubectl get deployment/date-webapp-deployment -n ${{ env.K8S_NAMESPACE }} -o jsonpath='{.status.readyReplicas}' | grep -q "$(microk8s kubectl get deployment/date-webapp-deployment -n ${{ env.K8S_NAMESPACE }} -o jsonpath='{.status.replicas}')"; then
-            echo "✅ Deployment already ready"
-            exit 0
-          fi
-
       - name: Wait for Rollout Completion
-        timeout-minutes: 3
+        timeout-minutes: 10
         run: |
           echo "⏳ Waiting for rollout to complete..."
           
