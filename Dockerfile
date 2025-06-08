@@ -33,6 +33,7 @@ RUN groupadd -g 1001 tomcat && \
 
 # Copia l'entrypoint script
 COPY env/entrypoint.sh /usr/local/bin/
+
 RUN chmod +x /usr/local/bin/entrypoint.sh && \
     chown tomcat:tomcat /usr/local/bin/entrypoint.sh
 
