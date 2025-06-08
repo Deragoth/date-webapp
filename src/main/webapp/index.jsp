@@ -23,22 +23,6 @@
 
         <div id="result"></div>
 
-<%
-    // Percorso del file nel container
-    String filePath = "/usr/local/tomcat/text-data/data.txt";
-    java.io.File file = new java.io.File(filePath);
-    // Scrivi dati sul file
-    try (java.io.FileWriter writer = new java.io.FileWriter(file, true)) {
-        writer.write("Linea aggiunta il " + java.time.LocalDate.now() + "\n");
-    }
-    // Leggi il contenuto del file
-    try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            out.println("<p>" + line + "</p>");
-        }
-    }
-%>
     </div>
 
     <script src="${pageContext.request.contextPath}/js/script.js"></script>
