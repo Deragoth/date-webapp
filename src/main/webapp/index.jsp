@@ -35,7 +35,7 @@
             <%= LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) %>
         </p>
 
-        <!-- Tabella delle variabili d'ambiente -->
+        <!-- Tabella delle variabili d'ambiente
         <h2>Variabili d'Ambiente</h2>
         <table>
             <thead>
@@ -58,7 +58,7 @@
                 %>
             </tbody>
         </table>
-
+-->
         <!-- Bottone e sezione per fare fetch della data tramite JavaScript -->
         <button id="getDateBtn">Ottieni Data e Ora</button>
         <div id="result"></div>
