@@ -23,7 +23,7 @@ public class FileHandlerServlet extends HttpServlet {
         fileService.writeFile(inputText);
 
         // Reindirizza alla pagina JSP per aggiornare il contenuto
-        response.sendRedirect("index.jsp");
+        response.sendRedirect(request.getContextPath() + "/home");
     }
 
     @Override
