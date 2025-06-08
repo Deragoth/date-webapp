@@ -43,6 +43,22 @@
                 </tr>
             </thead>
             <tbody>
+
+            <%
+                // Limita solo alle variabili necessarie
+                String[] importantVars = {"app.name", "app.version", "linkUrl", "database.url", "database.username", "database.password", "redis.host", "redis.port", "log.level", "feature.newUI", "api.timeout"};
+                Map<String, String> env = System.getenv();
+
+                for (String varName : importantVars) {
+                    String value = env.get(varName);
+                    if (value != null) {
+            %>
+                <tr>
+                    <td><%= varName %></td>
+                    <td><%= value.length() > 100 ? value.substring(0, 100) + "..." : value %></td>
+                </tr>
+            <%
+
             </tbody>
         </table>
 
