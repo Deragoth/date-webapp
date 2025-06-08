@@ -33,6 +33,30 @@
             <%= LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) %>
         </p>
 
+        <!-- Tabella delle variabili d'ambiente -->
+        <h2>Variabili d'Ambiente</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Chiave</th>
+                    <th>Valore</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%
+                    Map<String, String> env = System.getenv();
+                    for (Map.Entry<String, String> entry : env.entrySet()) {
+                %>
+                <tr>
+                    <td><%= entry.getKey() %></td>
+                    <td><%= entry.getValue() %></td>
+                </tr>
+                <%
+                    }
+                %>
+            </tbody>
+        </table>
+
         <button id="getDateBtn">Ottieni Data Attuale</button>
 
         <div id="result"></div>
