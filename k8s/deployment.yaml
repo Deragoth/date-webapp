@@ -35,6 +35,10 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          # Aggiunta volume
+          volumeMounts:
+            - name: txt-volume
+              mountPath: "/usr/local/tomcat/text-data" # Path del volume
           resources:
             requests:
               memory: "256Mi"
@@ -69,3 +73,8 @@ spec:
           imagePullPolicy: Always
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
+      volumes: # VOLUMI
+        - name: txt-volume
+          hostPath:
+            path: "/data/k8s-text-file/" # Percorso sull'host (nodo)
+            type: DirectoryOrCreate
