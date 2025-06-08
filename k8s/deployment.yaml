@@ -29,16 +29,17 @@ spec:
         prometheus.io/path: "/metrics"
     spec:
       automountServiceAccountToken: false  # <- AGGIUNTO: disabilita automount
+      # Aggiunta contesto di autorizzazione per tutti i container del POD
+      securityContext:
+        runAsUser: 1001          # UID dell'utente Tomcat
+        runAsGroup: 1001         # GID dell'utente Tomcat
+        fsGroup: 1001            # GID per garantire l'accesso al volume
       containers:
         - name: webapp
           image: localhost:32000/date-webapp:latest
           ports:
             - containerPort: 8080
               name: http
-          securityContext:
-            runAsUser: 1001          # UID dell'utente Tomcat
-            runAsGroup: 1001         # GID dell'utente Tomcat
-            fsGroup: 1001            # GID per garantire l'accesso al volume
           # Aggiunta volume
           volumeMounts:
             - name: txt-volume
