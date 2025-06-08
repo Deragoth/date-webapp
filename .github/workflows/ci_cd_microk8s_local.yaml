@@ -16,6 +16,16 @@ on:
 #  pull_request:
 #    branches: [ master ]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Seleziona ambiente di destinazione'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
 
 env:
   REGISTRY: localhost:32000
@@ -137,6 +147,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+          # passa i parametri al Dockerfile
+          build-args: |
+            ENVIRONMENT=${{ github.event.inputs.environment }}
 
       #**********************************************
       # Verifica vulnerabilità CVE con Trivy
