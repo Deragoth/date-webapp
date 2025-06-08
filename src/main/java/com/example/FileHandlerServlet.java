@@ -29,7 +29,10 @@ public class FileHandlerServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Leggi il contenuto del file tramite il FileService
-        List<String> fileContent = fileService.readFile();
+        System.out.println("Esecuzione del metodo doGet() - Lettura del file...");
+        List<String> fileContent = fileService.readFile(); // Chiama la funzione di lettura
+        System.out.println("Contenuto file letto: " + fileContent); // Log per verificare i dati
+
 
         // Salva il contenuto come attributo della richiesta
         request.setAttribute("fileContent", fileContent);

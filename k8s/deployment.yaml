@@ -81,5 +81,7 @@ spec:
       volumes: # VOLUMI
         - name: txt-volume
           hostPath:
+            # Con hostPath e DirectoryOrCreate si può solo usare un percorso presente nell'host su cui gira K8s
+            # Definire i permessi di questo path come quelli assegnati nel Dockerfile all'app altrimenti associa 'root'
             path: "/data/k8s-text-file/" # Percorso sull'host (nodo)
             type: DirectoryOrCreate

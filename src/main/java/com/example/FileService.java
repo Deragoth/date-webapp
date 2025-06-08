@@ -17,6 +17,7 @@ public class FileService {
      * @throws IOException In caso di errore durante la lettura del file.
      */
     public List<String> readFile() throws IOException {
+        System.out.println("Entra nel ReadFile");
         List<String> lines = new ArrayList<>();
         File file = new File(FILE_PATH);
 
@@ -27,8 +28,11 @@ public class FileService {
                     lines.add(line);
                 }
             }
+        } else {
+            System.out.println("Il file non esiste: " + FILE_PATH);
         }
 
+        System.out.println("Linee lette dal file: " + lines); // Mostra le linee lette per debug
         return lines;
     }
 
