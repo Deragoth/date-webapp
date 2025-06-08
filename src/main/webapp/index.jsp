@@ -46,7 +46,8 @@
 
             <%
                 // Limita solo alle variabili necessarie
-                String[] importantVars = {"app.name", "app.version", "linkUrl", "database.url", "database.username", "database.password", "redis.host", "redis.port", "log.level", "feature.newUI", "api.timeout"};
+                String[] importantVars = {"app.name", "app.version", "linkUrl", "database.url", "database.username", "database.password"};
+                //, "redis.host", "redis.port", "log.level", "feature.newUI", "api.timeout"
                 Map<String, String> env = System.getenv();
 
                 for (String varName : importantVars) {
