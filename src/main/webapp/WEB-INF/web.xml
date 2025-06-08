@@ -23,6 +23,16 @@
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>FileHandlerServlet</servlet-name>
+        <servlet-class>com.example.FileHandlerServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>FileHandlerServlet</servlet-name>
+        <url-pattern>/index.jsp</url-pattern>
+    </servlet-mapping>
+
     <!-- Configurazione per la home page JSP -->
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
