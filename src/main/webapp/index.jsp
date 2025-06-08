@@ -43,19 +43,6 @@
                 </tr>
             </thead>
             <tbody>
-<!--
-                <%
-                    Map<String, String> env = System.getenv();
-                    for (Map.Entry<String, String> entry : env.entrySet()) {
-                %>
-                <tr>
-                    <td><%= entry.getKey() %></td>
-                    <td><%= entry.getValue() %></td>
-                </tr>
-                <%
-                    }
-                %>
--->
             </tbody>
         </table>
 
