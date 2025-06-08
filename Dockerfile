@@ -32,7 +32,7 @@ RUN groupadd -g 1001 tomcat && \
     chown -R tomcat:tomcat "${CATALINA_HOME}"
 
 # Copia l'entrypoint script
-COPY entrypoint.sh /usr/local/bin/
+COPY env/entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh && \
     chown tomcat:tomcat /usr/local/bin/entrypoint.sh
 
