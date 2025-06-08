@@ -13,7 +13,6 @@
     <div class="container">
         <h1>Applicazione Data</h1>
 
-        <%-- Utilizzo di Java direttamente nella JSP per mostrare la data di sistema sul server --%>
         <p>
             Data di caricamento della pagina - Versione 5:
             <%= LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) %>
@@ -22,6 +21,30 @@
         <button id="getDateBtn">Ottieni Data Attuale</button>
 
         <div id="result"></div>
+
+
+        <%-- Mostra il contenuto del file --%>
+        <h2>Contenuto del file:</h2>
+        <div id="fileContent">
+            <%
+                // Percorso del file nel container
+                String filePath = "/usr/local/tomcat/text-data/data.txt";
+                java.io.File file = new java.io.File(filePath);
+
+                if (file.exists()) {
+                    try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            out.println("<p>" + line + "</p>");
+                        }
+                    } catch (java.io.IOException e) {
+                        out.println("<p>Errore durante la lettura del file: " + e.getMessage() + "</p>");
+                    }
+                } else {
+                    out.println("<p>Il file non esiste ancora. Inserisci del testo per crearlo.</p>");
+                }
+            %>
+        </div>
 
     </div>
 
