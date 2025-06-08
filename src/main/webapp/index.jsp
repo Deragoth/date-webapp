@@ -22,28 +22,28 @@
 
         <div id="result"></div>
 
+        <!-- Form per scrivere testo nel file -->
+        <form method="post" action="FileHandlerServlet">
+            <label for="inputText">Inserisci del testo:</label><br>
+            <input type="text" id="inputText" name="textInput" required placeholder="Scrivi qualcosa..."><br><br>
+            <button type="submit">Scrivi nel file</button>
+        </form>
 
-        <%-- Mostra il contenuto del file --%>
+        <!-- Mostra il contenuto del file -->
         <h2>Contenuto del file:</h2>
         <div id="fileContent">
-            <%
-                // Percorso del file nel container
-                String filePath = "/usr/local/tomcat/text-data/data.txt";
-                java.io.File file = new java.io.File(filePath);
-
-                if (file.exists()) {
-                    try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file))) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            out.println("<p>" + line + "</p>");
-                        }
-                    } catch (java.io.IOException e) {
-                        out.println("<p>Errore durante la lettura del file: " + e.getMessage() + "</p>");
-                    }
-                } else {
-                    out.println("<p>Il file non esiste ancora. Inserisci del testo per crearlo.</p>");
-                }
-            %>
+            <c:choose>
+                <c:when test="${not empty fileContent}">
+                    <ul>
+                        <c:forEach var="line" items="${fileContent}">
+                            <li><c:out value="${line}" /></li>
+                        </c:forEach>
+                    </ul>
+                </c:when>
+                <c:otherwise>
+                    <p>Il file è vuoto o non esiste ancora.</p>
+                </c:otherwise>
+            </c:choose>
         </div>
 
     </div>
