@@ -30,7 +30,7 @@
 
     <servlet-mapping>
         <servlet-name>FileHandlerServlet</servlet-name>
-        <url-pattern>/index.jsp</url-pattern>
+        <url-pattern>/home</url-pattern>
     </servlet-mapping>
 
     <!-- Configurazione per la home page JSP -->
