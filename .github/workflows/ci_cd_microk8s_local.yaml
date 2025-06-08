@@ -97,7 +97,7 @@ jobs:
             # Imposta l'ambiente in base al branch
             REF=${{ github.ref }}
             if [[ "$REF" == "refs/heads/main" ]]; then
-              echo "environment=production" >> $GITHUB_ENV
+              echo "environment=development" >> $GITHUB_ENV
             elif [[ "$REF" == "refs/heads/staging" ]]; then
               echo "environment=staging" >> $GITHUB_ENV
             else
