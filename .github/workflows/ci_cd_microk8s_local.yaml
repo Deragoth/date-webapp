@@ -83,6 +83,28 @@ jobs:
       image-digest: ${{ steps.build.outputs.digest }}       # variabile usata in step successivi
     steps:
 
+      #*****************************************************
+      # Step per configurare l'ambiente basato sul branch
+      #*****************************************************
+      - name: Step predefined ENVIRONMENT
+        id: setup-env
+        run: |
+          # Controlla se il workflow è stato avviato manualmente
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Ambiente impostato manualmente: ${{ github.event.inputs.environment }}"
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          else
+            # Imposta l'ambiente in base al branch
+            REF=${{ github.ref }}
+            if [[ "$REF" == "refs/heads/main" ]]; then
+              echo "environment=production" >> $GITHUB_ENV
+            elif [[ "$REF" == "refs/heads/staging" ]]; then
+              echo "environment=staging" >> $GITHUB_ENV
+            else
+              echo "environment=development" >> $GITHUB_ENV
+            fi
+          fi
+
       #**********************************************
       # Checkout del codice per Docker
       #**********************************************
@@ -149,7 +171,8 @@ jobs:
           platforms: linux/amd64
           # passa i parametri al Dockerfile
           build-args: |
-            ENVIRONMENT=${{ github.event.inputs.environment }}
+            ENVIRONMENT=${{ env.environment }}
+          # ENVIRONMENT=${{ github.event.inputs.environment }}
 
       #**********************************************
       # Verifica vulnerabilità CVE con Trivy
