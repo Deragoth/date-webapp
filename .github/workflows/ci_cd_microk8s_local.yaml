@@ -186,7 +186,7 @@ jobs:
     # Agiuntavariabile d'ambiente
     environment:
       name: ${{ needs.build-and-test.outputs.ENVIRONMENT || 'development' }}
-      env:
+    env:
         ENVIRONMENT: ${{ needs.build-and-test.outputs.ENVIRONMENT || 'development' }}
 
     steps:
