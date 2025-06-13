@@ -36,8 +36,7 @@ jobs:
       # Checkout del codice
       #**********************************************
 
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Variabili d'ambiente
         run: |
