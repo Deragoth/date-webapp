@@ -43,11 +43,10 @@ spec:
           # Importazione delle variabili dal ConfigMap
           envFrom:
             - configMapRef:
-              name: date-webapp-config
+                name: date-webapp-config
             - secretRef:
                 name: date-webapp-secrets
-
-              # Aggiunta volume
+          # Aggiunta volume
           volumeMounts:
             - name: txt-volume
               mountPath: "/usr/local/tomcat/text-data" # Path del volume
