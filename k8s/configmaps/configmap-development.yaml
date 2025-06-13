@@ -2,8 +2,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: date-webapp-config
-  namespace: development
+  name: date-webapp-config-development
+  namespace: test-webapp
 data:
   # Database
   DATABASE_URL: "jdbc:mysql://dev-db:3306/myapp_dev"

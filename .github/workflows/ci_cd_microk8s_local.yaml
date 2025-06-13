@@ -11,7 +11,7 @@
 name: Test Java JSP CI/CD
 
 on:
-  push:
+#  push:
 #    branches: [ main, develop, staging ]
 #  pull_request:
 #    branches: [ master ]
