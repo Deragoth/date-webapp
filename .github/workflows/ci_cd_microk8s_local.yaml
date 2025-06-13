@@ -43,18 +43,14 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "Lanciato manualmente"
             echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-      #      echo "NAMESPACE=${{ github.event.inputs.environment }}-namespace" >> $GITHUB_ENV
           else
             echo "Lanciato automaticamente da un push"
             if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
               echo "ENVIRONMENT=production" >> $GITHUB_ENV
-      #        echo "NAMESPACE=production" >> $GITHUB_ENV
             elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
               echo "ENVIRONMENT=staging" >> $GITHUB_ENV
-      #        echo "NAMESPACE=staging" >> $GITHUB_ENV
             else
               echo "ENVIRONMENT=development" >> $GITHUB_ENV
-      #        echo "NAMESPACE=development" >> $GITHUB_ENV
             fi
           fi
 
