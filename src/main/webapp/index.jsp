@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.time.LocalDate, java.time.format.DateTimeFormatter" %>
+<%@ page import="com.example.config.AppConfig" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="it">
@@ -32,8 +33,14 @@
         <!-- Mostra il contenuto del file -->
         <%
             Object debugFileContent = request.getAttribute("fileContent");
-            System.out.println("Controllo JSP: fileContent = " + debugFileContent);
+            Object apiBaseUrl = request.getAttribute("API_BASE_URL");
+            Object appEnvironment = request.getAttribute("APP_ENVIRONMENT");
+            System.out.println("Controllo JSP: fileContent    = " + debugFileContent);
+            System.out.println("               apiBaseurl     = " + apiBaseurl);
+            System.out.println("               appEnvironment = " + appEnvironment);
         %>
+        <p><b>Debug contenuto apiBaseUrl:</b> <%=apiBaseUrl%></p>
+        <p><b>Debug contenuto appEnvironment:</b> <%=appEnvironment%></p>
         <p><b>Debug contenuto fileContent:</b> <%=debugFileContent%></p>
 
         <h2>Contenuto del file:</h2>

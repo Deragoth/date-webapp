@@ -1,0 +1,24 @@
+# k8s/configmaps/configmap-dev.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: date-webapp-config
+  namespace: development
+data:
+  # Database
+  DATABASE_URL: "jdbc:mysql://dev-db:3306/myapp_dev"
+  DATABASE_DRIVER: "com.mysql.cj.jdbc.Driver"
+
+  # Application
+  APP_ENVIRONMENT: "development"
+  LOG_LEVEL: "DEBUG"
+  SERVER_PORT: "8080"
+
+  # External Services
+  API_BASE_URL: "https://api-dev.example.com"
+  REDIS_HOST: "redis-dev"
+  REDIS_PORT: "6379"
+
+  # Features flags
+  ENABLE_DEBUG_MODE: "true"
+  ENABLE_CACHE: "false"

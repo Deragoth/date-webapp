@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.config.AppConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -36,6 +37,10 @@ public class FileHandlerServlet extends HttpServlet {
 
         // Salva il contenuto come attributo della richiesta
         request.setAttribute("fileContent", fileContent);
+
+        // Legge le variabili d'ambiente
+        request.setAttribute("API_BASE_URL", AppConfig.API_BASE_URL);
+        request.setAttribute("APP_ENVIRONMENT", AppConfig.APP_ENVIRONMENT);
 
         // Inoltra la richiesta alla JSP
         request.getRequestDispatcher("/index.jsp").forward(request, response);

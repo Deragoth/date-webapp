@@ -12,10 +12,15 @@ name: Test Java JSP CI/CD
 
 on:
   push:
-    branches: [ main ]
+#    branches: [ main, develop, staging ]
 #  pull_request:
 #    branches: [ master ]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Seleziona l'ambiente (dev, staging, prod)"
+        required: true
+        default: "dev" # Ambiente predefinito
 
 env:
   REGISTRY: localhost:32000
@@ -31,7 +36,37 @@ jobs:
       # Checkout del codice
       #**********************************************
 
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      #**********************************************
+      # Setup delle variabili d'ambiente
+      #**********************************************
+
+      - name: Set up Variabili d'ambiente
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Lanciato manualmente"
+      #      echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          else
+            echo "Lanciato automaticamente da un push"
+            if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+              echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+      #        echo "NAMESPACE=production" >> $GITHUB_ENV
+            elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+              echo "ENVIRONMENT=staging" >> $GITHUB_ENV
+      #        echo "NAMESPACE=staging" >> $GITHUB_ENV
+            else
+              echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+      #        echo "NAMESPACE=development" >> $GITHUB_ENV
+            fi
+          fi
+
+      - name: Debug Evento
+        run: |
+          echo "Evento ricevuto: ${{ github.event_name }}"
+          echo "Input ENVIRONMENT: ${{ github.event.inputs.environment }}"
+          echo "Branch: ${{ github.ref }}"
 
       #**********************************************
       # Imposta la JDK per l'app

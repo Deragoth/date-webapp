@@ -1,0 +1,24 @@
+# k8s/configmaps/configmap-staging.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: date-webapp-config
+  namespace: staging
+data:
+  # Database
+  DATABASE_URL: "jdbc:mysql://staging-db:3306/myapp_staging"
+  DATABASE_DRIVER: "com.mysql.cj.jdbc.Driver"
+
+  # Application
+  APP_ENVIRONMENT: "staging"
+  LOG_LEVEL: "INFO"
+  SERVER_PORT: "8080"
+
+  # External Services
+  API_BASE_URL: "https://api-staging.example.com"
+  REDIS_HOST: "redis-staging"
+  REDIS_PORT: "6379"
+
+  # Features flags
+  ENABLE_DEBUG_MODE: "false"
+  ENABLE_CACHE: "true"

@@ -1,0 +1,25 @@
+# k8s/configmaps/configmap-prod.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: date-webapp-config
+  namespace: production
+data:
+  # Database
+  DATABASE_URL: "jdbc:mysql://prod-db:3306/myapp_prod"
+  DATABASE_DRIVER: "com.mysql.cj.jdbc.Driver"
+
+  # Application
+  APP_ENVIRONMENT: "production"
+  LOG_LEVEL: "WARN"
+  SERVER_PORT: "8080"
+
+  # External Services
+  API_BASE_URL: "https://api.example.com"
+  REDIS_HOST: "redis-prod"
+  REDIS_PORT: "6379"
+
+  # Features flags
+  ENABLE_DEBUG_MODE: "false"
+  ENABLE_CACHE: "true"
+
