@@ -5,6 +5,13 @@ metadata:
   labels:
     app: date-webapp
     environment: {{ .Values.config.APP_ENVIRONMENT }}
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/component: "service"
+  annotations:
+    meta.helm.sh/release-name: "{{ .Release.Name }}"
+    meta.helm.sh/release-namespace: "{{ .Release.Namespace }}"
+
 spec:
   type: ClusterIP
   selector:
