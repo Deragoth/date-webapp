@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: date-webapp-config
+  labels:
+    app: date-webapp
+    environment: {{ .Values.config.APP_ENVIRONMENT }}
+data:
+  ENV: {{ .Values.config.ENV | quote }}
+  JAVA_OPTS: {{ .Values.config.JAVA_OPTS | quote }}
+  APP_VERSION: {{ .Values.config.APP_VERSION | quote }}
+  CUSTOM_TEXT: {{ .Values.config.customText | quote }}
+
+  # Database
+  DATABASE_URL: {{ .Values.config.DATABASE_URL | quote }}
+  DATABASE_DRIVER: {{ .Values.config.DATABASE_DRIVER | quote }}
+
+  # Application
+  APP_ENVIRONMENT: {{ .Values.config.APP_ENVIRONMENT | quote }}
+  LOG_LEVEL: {{ .Values.config.LOG_LEVEL | quote }}
+
+  # External Services
+  API_BASE_URL: {{ .Values.config.API_BASE_URL | quote }}
+
+  # Features flags
+  ENABLE_DEBUG_MODE: {{ .Values.config.ENABLE_DEBUG_MODE | quote }}
+  ENABLE_CACHE: {{ .Values.config.ENABLE_CACHE | quote }}

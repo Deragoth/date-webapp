@@ -1,0 +1,30 @@
+namespace: test-webapp-production
+
+ingress:
+  host: wsl.local
+
+config:
+  ENV: production
+  JAVA_OPTS: "-Xmx512m -Xms256m"
+  APP_VERSION: "1.0.2"
+  customText: "Hello from production config!"
+
+  # Database
+  DATABASE_URL: "jdbc:mysql://prod-db:3306/myapp_prod"
+  DATABASE_DRIVER: "com.mysql.cj.jdbc.Driver"
+
+  # Application
+  APP_ENVIRONMENT: "production"
+  LOG_LEVEL: "WARN"
+
+  # External Services
+  API_BASE_URL: "https://api.example.com"
+
+  # Features flags
+  ENABLE_DEBUG_MODE: "false"
+  ENABLE_CACHE: "true"
+
+secrets:
+  DATABASE_PASSWORD: "prod_password"
+  JWT_SECRET: "prod_jwt_secret_key"
+  API_KEY: "prod_api_key"

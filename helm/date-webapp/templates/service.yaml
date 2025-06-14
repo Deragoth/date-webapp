@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: date-webapp-service
+  labels:
+    app: date-webapp
+    environment: {{ .Values.config.APP_ENVIRONMENT }}
+spec:
+  type: ClusterIP
+  selector:
+    app: date-webapp
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080

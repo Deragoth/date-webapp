@@ -1,0 +1,22 @@
+apiVersion: v2
+name: date-webapp
+description: Helm chart per Date Webapp
+type: application
+version: 0.1.0           # Versione della chart (incrementa per ogni release)
+appVersion: "1.0.0"      # Versione dell'app (puoi parametrizzarla da GitHub Actions)
+
+keywords:
+  - java
+  - tomcat
+  - webapp
+  - microk8s
+  - date-webapp
+
+maintainers:
+  - name: Marco
+    email: tua.email@example.com
+
+home: https://github.com/Deragoth/date-webapp
+sources:
+  - https://github.com/Deragoth/date-webapp
+

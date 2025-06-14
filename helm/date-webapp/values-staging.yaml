@@ -1,0 +1,30 @@
+namespace: test-webapp-staging
+
+ingress:
+  host: wsl.local
+
+config:
+  ENV: staging
+  JAVA_OPTS: "-Xmx512m -Xms256m"
+  APP_VERSION: "1.0.1"
+  customText: "Hello from staging config!"
+
+  # Database
+  DATABASE_URL: "jdbc:mysql://staging-db:3306/myapp_staging"
+  DATABASE_DRIVER: "com.mysql.cj.jdbc.Driver"
+
+  # Application
+  APP_ENVIRONMENT: "staging"
+  LOG_LEVEL: "INFO"
+
+  # External Services
+  API_BASE_URL: "https://api-staging.example.com"
+
+  # Features flags
+  ENABLE_DEBUG_MODE: "false"
+  ENABLE_CACHE: "true"
+
+secrets:
+  DATABASE_PASSWORD: "staging_password"
+  JWT_SECRET: "staging_jwt_secret_key"
+  API_KEY: "staging_api_key"

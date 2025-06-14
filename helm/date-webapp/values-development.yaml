@@ -1,0 +1,30 @@
+namespace: test-webapp
+
+ingress:
+  host: wsl.local
+
+config:
+  ENV: development
+  JAVA_OPTS: "-Xmx512m -Xms256m"
+  APP_VERSION: "1.0.0"
+  customText: "Hello from production config!"
+
+  # Database
+  DATABASE_URL: "jdbc:mysql://dev-db:3306/myapp_dev"
+  DATABASE_DRIVER: "com.mysql.cj.jdbc.Driver"
+
+  # Application
+  APP_ENVIRONMENT: "development"
+  LOG_LEVEL: "DEBUG"
+
+  # External Services
+  API_BASE_URL: "https://api-dev.example.com"
+
+  # Features flags
+  ENABLE_DEBUG_MODE: "true"
+  ENABLE_CACHE: "false"
+
+secrets:
+  DATABASE_PASSWORD: "dev_password"
+  JWT_SECRET: "dev_jwt_secret_key"
+  API_KEY: "dev_api_key"

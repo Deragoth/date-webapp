@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: date-webapp-deployment
+  labels:
+    app: date-webapp
+    environment: {{ .Values.config.APP_ENVIRONMENT }}
+    version: v1
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: date-webapp
+  template:
+    metadata:
+      labels:
+        app: date-webapp
+        environment: {{ .Values.config.APP_ENVIRONMENT }}
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+        - name: webapp
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: date-webapp-config
+            - secretRef:
+                name: date-webapp-secrets
+          env:
+            - name: JAVA_OPTS
+              value: {{ .Values.config.JAVA_OPTS | quote }}
+            - name: APP_VERSION
+              value: {{ .Values.config.APP_VERSION | quote }}
+          volumeMounts:
+            - name: txt-volume
+              mountPath: "/usr/local/tomcat/text-data"
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory | quote }}
+              cpu: {{ .Values.resources.requests.cpu | quote }}
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: {{ .Values.resources.limits.memory | quote }}
+              cpu: {{ .Values.resources.limits.cpu | quote }}
+              ephemeral-storage: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: txt-volume
+          hostPath:
+            path: "/data/k8s-text-file/"
+            type: DirectoryOrCreate
