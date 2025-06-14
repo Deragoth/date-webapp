@@ -30,13 +30,8 @@
 
     <servlet-mapping>
         <servlet-name>FileHandlerServlet</servlet-name>
-        <url-pattern>/home</url-pattern>
+        <url-pattern>/</url-pattern>
     </servlet-mapping>
-
-    <!-- Configurazione per la home page JSP -->
-    <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
-    </welcome-file-list>
 
     <!-- Configurazione delle JSP -->
     <jsp-config>
