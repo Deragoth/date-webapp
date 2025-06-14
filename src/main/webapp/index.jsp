@@ -1,7 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.time.LocalDate, java.time.format.DateTimeFormatter" %>
 <%@ page import="com.example.config.AppConfig" %>
-<%@ taglib uri="https://jakarta.ee/jstl/core" prefix="c" %>
+<%@ taglib prefix="c" uri="https://jakarta.ee/jstl/core" %>
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
