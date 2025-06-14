@@ -37,7 +37,7 @@
             Object apiBaseUrl = request.getAttribute("API_BASE_URL");
             Object appEnvironment = request.getAttribute("APP_ENVIRONMENT");
             System.out.println("Controllo JSP: fileContent    = " + debugFileContent);
-            System.out.println("               apiBaseurl     = " + apiBaseurl);
+            System.out.println("               apiBaseurl     = " + apiBaseUrl);
             System.out.println("               appEnvironment = " + appEnvironment);
         %>
         <p><b>Debug contenuto apiBaseUrl:</b> <%=apiBaseUrl%></p>
