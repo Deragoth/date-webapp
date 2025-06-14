@@ -23,7 +23,9 @@ on:
         default: "development" # Ambiente predefinito
 
 env:
-  REGISTRY: localhost:32000
+  # Impostato Registry nel etc/hosts di Windows perchè ipod non possono
+  # raggiungere il localhost dell'HOST
+  REGISTRY: registry.wsl.local:32000
   IMAGE_NAME: date-webapp
   K8S_NAMESPACE: test-webapp
 
