@@ -256,9 +256,9 @@ jobs:
 
       - name: Rimuovi eventuali servizi precedenti non gestiti da HELM
         run: |
-          microk8s kubectl delete service ${{ env.IMAGE_NAME }}-service --namespace=${{ env.K8S_NAMESPACE }}
-          microk8s kubectl delete deployment ${{ env.IMAGE_NAME }}-deployment --namespace=${{ env.K8S_NAMESPACE }}|| true
-          microk8s kubectl delete ingress ${{ env.IMAGE_NAME }}-ingress --namespace=${{ env.K8S_NAMESPACE }} || true
+          microk8s kubectl delete service ${{ env.IMAGE_NAME }}-service --namespace=${{ env.K8S_NAMESPACE }} --ignore-not-found
+          microk8s kubectl delete deployment ${{ env.IMAGE_NAME }}-deployment --namespace=${{ env.K8S_NAMESPACE }} --ignore-not-found
+          microk8s kubectl delete ingress ${{ env.IMAGE_NAME }}-ingress --namespace=${{ env.K8S_NAMESPACE }} --ignore-not-found
 
       - name: Deploy Helm Charts
         run: |
