@@ -244,7 +244,7 @@ jobs:
       - name: Deploy Helm Charts
         run: |
           echo "Deploying Helm release for environment: ${{ env.ENVIRONMENT }}"
-          helm upgrade --install date-webapp ./helm/ \
+          helm upgrade --install date-webapp ./helm/date-webapp \
               --namespace=${{ env.K8S_NAMESPACE }} \
               --set environment=${{ env.ENVIRONMENT }} \
               --set registry=${{ env.REGISTRY }}
