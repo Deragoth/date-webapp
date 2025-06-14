@@ -229,11 +229,11 @@ jobs:
       - name: Pull e Push nel Registry Locale
         run: |
           echo "📥 Pulling image from Docker Hub..."
-          docker pull khamsin/${{ env.IMAGE-NAME }}:${{ github.sha }}
+          docker pull khamsin/${{ env.IMAGE_NAME }}:${{ github.sha }}
           
           echo "🏷️ Tagging for local registry..."
-          docker tag khamsin/${{ env.IMAGE-NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          docker tag khamsin/${{ env.IMAGE-NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker tag khamsin/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker tag khamsin/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           
           echo "📤 Pushing to MicroK8s registry..."
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
@@ -256,12 +256,12 @@ jobs:
 
       - name: Rimuovi eventuali servizi precedenti non gestiti da HELM
         run: |
-          microk8s kubectl delete service ${{ env.IMAGE-NAME }}-service --namespace=${{ env.K8S_NAMESPACE }}
+          microk8s kubectl delete service ${{ env.IMAGE_NAME }}-service --namespace=${{ env.K8S_NAMESPACE }}
 
       - name: Deploy Helm Charts
         run: |
           echo "Deploying Helm release for environment: ${{ env.ENVIRONMENT }}"
-          helm upgrade --install ${{ env.IMAGE_NAME }} ./helm/date-webapp \
+          helm upgrade --install ${{ env.IMAGE_NAME }} ./helm \
               --namespace=${{ env.K8S_NAMESPACE }} \
               --set environment=${{ env.ENVIRONMENT }} \
               --set registry=${{ env.REGISTRY }}
