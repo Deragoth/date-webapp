@@ -26,7 +26,7 @@ env:
   # Impostato Registry nel etc/hosts di Windows perchè ipod non possono
   # raggiungere il localhost dell'HOST
   # REGISTRY: registry.wsl.local:32000
-  REGISTRY: localhost:32000
+  REGISTRY: registry.wsl.local:32000
   IMAGE_NAME: date-webapp
 
 jobs:
