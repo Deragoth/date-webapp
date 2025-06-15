@@ -1,4 +1,4 @@
-namespace: test-webapp-staging
+namespace: webapp-staging
 
 ingress:
   host: wsl.local

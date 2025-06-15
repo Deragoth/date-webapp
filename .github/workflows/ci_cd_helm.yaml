@@ -190,10 +190,22 @@ jobs:
       name: ${{ needs.build-and-test.outputs.ENVIRONMENT || 'development' }}
     env:
       ENVIRONMENT: ${{ needs.build-and-test.outputs.ENVIRONMENT || 'development' }}
-      K8S_NAMESPACE: test-webapp
+      # Assegnazione momentanea
+      K8S_NAMESPACE: webapp-${{ needs.build-and-test.outputs.ENVIRONMENT || 'development' }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Estrai il namespace dal file di valori
+        id: extract-namespace
+        run: |
+          echo "Estraendo il namespace per l'ambiente ${{ env.ENVIRONMENT }}..."
+          NAMESPACE=$(yq '.namespace' values-${{ env.ENVIRONMENT }}.yaml)
+          echo "K8S_NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
+      - name: Debug Variabili
+        run: |
+          echo "ENVIRONMENT: ${{ env.ENVIRONMENT }}"
+          echo "K8S_NAMESPACE: ${{ env.K8S_NAMESPACE }}"
 
       # ============================================
       # Controlli PRE-DEPLOYMENT

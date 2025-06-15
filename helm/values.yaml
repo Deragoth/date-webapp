@@ -5,7 +5,7 @@ image:
   tag: latest
   pullPolicy: Always
 
-namespace: test-webapp
+namespace: webapp-development
 
 config:
   ENV: development

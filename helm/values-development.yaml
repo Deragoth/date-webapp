@@ -1,4 +1,4 @@
-namespace: test-webapp
+namespace: webapp-development
 
 ingress:
   host: wsl.local

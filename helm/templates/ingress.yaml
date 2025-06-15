@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: date-webapp-ingress
+  namespace: {{ .Values.namespace }}
   labels:
     app: date-webapp
     environment: {{ .Values.config.APP_ENVIRONMENT }}
