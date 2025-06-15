@@ -19,9 +19,16 @@ public class FileHandlerServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Ottieni il testo inviato dalla casella del form
         String inputText = request.getParameter("textInput");
+        String action = request.getParameter("action");
 
-        // Scrivi il testo nel file tramite il FileService
-        fileService.writeFile(inputText);
+        if ("write".equals(action)) {
+            // Logica per scrivere nel file
+            // Scrivi il testo nel file tramite il FileService
+            fileService.writeFile(inputText);
+        } else if ("clear".equals(action)) {
+            // Logica per svuotare il file
+            fileService.cleanFile();
+        }
 
         // Reindirizza alla pagina JSP per aggiornare il contenuto
         response.sendRedirect(request.getContextPath() + "/home");

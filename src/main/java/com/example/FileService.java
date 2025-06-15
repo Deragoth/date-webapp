@@ -1,6 +1,8 @@
 package com.example;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +51,18 @@ public class FileService {
 
         try (FileWriter writer = new FileWriter(file, true)) {
             writer.write(text + "\n");
+        }
+    }
+
+    /**
+     * Pulisce il file
+     * @throws IOException In caso di errore durante la scrittura nel file.
+     */
+    public void cleanFile() throws IOException {
+        try {
+            Files.write(Paths.get(FILE_PATH), "".getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
