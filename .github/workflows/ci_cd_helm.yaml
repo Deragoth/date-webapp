@@ -196,12 +196,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Estrai il namespace dal file di valori
+      # ============================================
+      # Estrazione variabili dai file di values
+      # ============================================
+      - name: Estrai il namespace usando grep e sed
         id: extract-namespace
         run: |
-          echo "Estraendo il namespace per l'ambiente ${{ env.ENVIRONMENT }}..."
-          NAMESPACE=$(yq '.namespace' values-${{ env.ENVIRONMENT }}.yaml)
+          echo "Estrazione namespace da values-${{ env.ENVIRONMENT }}.yaml..."
+          NAMESPACE=$(grep 'namespace:' values-${{ env.ENVIRONMENT }}.yaml | sed 's/namespace: //')
           echo "K8S_NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
+
       - name: Debug Variabili
         run: |
           echo "ENVIRONMENT: ${{ env.ENVIRONMENT }}"
