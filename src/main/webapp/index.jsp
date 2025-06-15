@@ -28,7 +28,7 @@
         <form method="post" action="home">
             <label for="inputText">Inserisci del testo:</label><br>
             <input type="text" id="inputText" name="textInput" required placeholder="Scrivi qualcosa..."><br><br>
-            <button type="submit" name="action" value="write">Scrivi nel file</button>
+            <button type="submit" name="action" value="write">Aggiungi nel file</button>
             <button type="submit" name="action" value="clear">Svuota File</button>
         </form>
 
