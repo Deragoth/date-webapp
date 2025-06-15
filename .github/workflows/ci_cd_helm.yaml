@@ -224,6 +224,13 @@ jobs:
           fi
 
       # ============================================
+      # VERIFICA ACCESSIBILITA' LOCALE
+      # ============================================
+      - name: Debug registry access
+        run: |
+          curl -v http://localhost:32000/v2/ || echo "Registry not reachable"
+          curl -v http://registry.wsl.local:32000/v2/ || echo "Registry not reachable"
+      # ============================================
       # GESTIONE IMMAGINE
       # ============================================
       - name: Pull e Push nel Registry Locale
