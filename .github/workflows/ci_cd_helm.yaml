@@ -202,8 +202,8 @@ jobs:
       - name: Estrai il namespace usando grep e sed
         id: extract-namespace
         run: |
-          echo "Estrazione namespace da values-${{ env.ENVIRONMENT }}.yaml..."
-          NAMESPACE=$(grep 'namespace:' values-${{ env.ENVIRONMENT }}.yaml | sed 's/namespace: //')
+          echo "Estrazione namespace da ./helm/values-${{ env.ENVIRONMENT }}.yaml..."
+          NAMESPACE=$(grep 'namespace:' ./helm/values-${{ env.ENVIRONMENT }}.yaml | sed 's/namespace: //')
           echo "K8S_NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
 
       - name: Debug Variabili
