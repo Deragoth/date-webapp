@@ -90,8 +90,8 @@ jobs:
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: date-webapp-${{ github.sha }}
-          path: target/date-webapp.war
+          name: ${{ env.IMAGE_NAME }}-${{ github.sha }}
+          path: target/${{ env.IMAGE_NAME }}.war
           retention-days: 1
 
     # Impostazione Variabile Ambiente
@@ -117,7 +117,7 @@ jobs:
       - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: date-webapp-${{ github.sha }}
+          name: ${{ env.IMAGE_NAME }}-${{ github.sha }}
           path: target/
 
       #**********************************************
@@ -149,7 +149,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: khamsin/date-webapp
+          images: khamsin/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-,format=short
@@ -164,8 +164,8 @@ jobs:
           context: .
           push: true
           tags: |
-            khamsin/date-webapp:latest
-            khamsin/date-webapp:${{ github.sha }}
+            khamsin/${{ env.IMAGE_NAME }}:latest
+            khamsin/${{ env.IMAGE_NAME }}:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -177,7 +177,7 @@ jobs:
       - name: Run Trivy for CVE
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'khamsin/date-webapp:${{ github.sha }}'
+          image-ref: 'khamsin/${{ env.IMAGE_NAME }}:${{ github.sha }}'
           format: 'table'
           exit-code: '0'
 
@@ -316,8 +316,8 @@ jobs:
           
           # Verifica che ConfigMap e Secret siano stati creati
           echo "✅ Verifying applied resources..."
-          microk8s kubectl get configmap -n ${{ env.K8S_NAMESPACE }} | grep date-webapp || echo "No ConfigMaps found"
-          microk8s kubectl get secret -n ${{ env.K8S_NAMESPACE }} | grep date-webapp || echo "No Secrets found"
+          microk8s kubectl get configmap -n ${{ env.K8S_NAMESPACE }} | grep ${{ env.IMAGE_NAME }} || echo "No ConfigMaps found"
+          microk8s kubectl get secret -n ${{ env.K8S_NAMESPACE }} | grep ${{ env.IMAGE_NAME }} || echo "No Secrets found"
           
           echo "✅ ConfigMaps and Secrets applied successfully"
 
@@ -375,13 +375,13 @@ jobs:
           echo "🚀 Updating deployment with new image..."
           
           # Aggiorna l'immagine del deployment
-          microk8s kubectl set image deployment/date-webapp-deployment \
+          microk8s kubectl set image deployment/${{ env.IMAGE_NAME }}-deployment \
             webapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             --namespace=${{ env.K8S_NAMESPACE }} \
             --record
           
           # Annota il deployment con metadata del deploy
-          microk8s kubectl annotate deployment/date-webapp-deployment \
+          microk8s kubectl annotate deployment/${{ env.IMAGE_NAME }}-deployment \
             deployment.kubernetes.io/revision-history-limit=10 \
             app.kubernetes.io/version=${{ github.sha }} \
             app.kubernetes.io/deployed-by="github-actions" \
@@ -398,7 +398,7 @@ jobs:
           echo "⏳ Waiting for rollout to complete..."
           
           # Aspetta il rollout con timeout
-          microk8s kubectl rollout status deployment/date-webapp-deployment \
+          microk8s kubectl rollout status deployment/${{ env.IMAGE_NAME }}-deployment \
             --namespace=${{ env.K8S_NAMESPACE }} \
             --timeout=600s
           
@@ -413,7 +413,7 @@ jobs:
           
           # Verifica che i pod siano running
           echo "📊 Pod Status:"
-          microk8s kubectl get pods -l app=date-webapp \
+          microk8s kubectl get pods -l app=${{ env.IMAGE_NAME }} \
             --namespace=${{ env.K8S_NAMESPACE }} \
             -o wide
           
@@ -424,12 +424,12 @@ jobs:
           
           # Verifica deployment details
           echo "🚀 Deployment Status:"
-          microk8s kubectl describe deployment/date-webapp-deployment \
+          microk8s kubectl describe deployment/${{ env.IMAGE_NAME }}-deployment \
             --namespace=${{ env.K8S_NAMESPACE }}
           
           # Health check dei pod
           echo "❤️ Pod Health Check:"
-          microk8s kubectl get pods -l app=date-webapp \
+          microk8s kubectl get pods -l app=${{ env.IMAGE_NAME }} \
             --namespace=${{ env.K8S_NAMESPACE }} \
             -o jsonpath='{.items[*].status.phase}' | grep -q "Running" || {
             echo "❌ Some pods are not running"
@@ -446,7 +446,7 @@ jobs:
           echo "🧹 Cleaning up old Docker images..."
           
           # Mantieni solo le ultime 3 versioni
-          docker images khamsin/date-webapp --format "table {{.Tag}}\t{{.ID}}" | \
+          docker images khamsin/${{ env.IMAGE_NAME }} --format "table {{.Tag}}\t{{.ID}}" | \
             tail -n +4 | head -n -3 | awk '{print \$2}' | \
             xargs -r docker rmi || true
           
@@ -465,12 +465,12 @@ jobs:
           echo "⚠️ Deployment failed. Preparing rollback..."
           
           # Mostra la storia dei rollout
-          microk8s kubectl rollout history deployment/date-webapp-deployment \
+          microk8s kubectl rollout history deployment/${{ env.IMAGE_NAME }}-deployment \
             --namespace=${{ env.K8S_NAMESPACE }}
           
           # Comando per rollback manuale (se necessario)
           echo "🔄 To rollback manually, run:"
-          echo "microk8s kubectl rollout undo deployment/date-webapp-deployment --namespace=${{ env.K8S_NAMESPACE }}"
+          echo "microk8s kubectl rollout undo deployment/${{ env.IMAGE_NAME }}-deployment --namespace=${{ env.K8S_NAMESPACE }}"
 
       - name: Prepare Rollback Information
         if: failure()
@@ -478,16 +478,16 @@ jobs:
           echo "⚠️ Deployment failed. Preparing rollback..."
           
           # Mostra la storia dei rollout
-          microk8s kubectl rollout history deployment/date-webapp-deployment \
+          microk8s kubectl rollout history deployment/${{ env.IMAGE_NAME }}-deployment \
             --namespace=${{ env.K8S_NAMESPACE }}
           
           # Comando per rollback manuale (se necessario)
           echo "🔄 Rolling back deployment..."
-          echo "microk8s kubectl rollout undo deployment/date-webapp-deployment --namespace=${{ env.K8S_NAMESPACE }}"
+          echo "microk8s kubectl rollout undo deployment/${{ env.IMAGE_NAME }}-deployment --namespace=${{ env.K8S_NAMESPACE }}"
           
           # Verifica lo stato del rollback
           echo "🔍 Verificando lo stato dopo il rollback..."
-          microk8s kubectl get pods -l app=date-webapp --namespace=${{ env.K8S_NAMESPACE }} -o wide || {
+          microk8s kubectl get pods -l app=${{ env.IMAGE_NAME }} --namespace=${{ env.K8S_NAMESPACE }} -o wide || {
             echo "❌ Problemi rilevati nei pod dopo il rollback"
             exit 1
           }
