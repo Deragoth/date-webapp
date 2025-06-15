@@ -274,14 +274,8 @@ jobs:
             --dry-run=client -o yaml | microk8s kubectl apply -f -
 
       # ============================================
-      # RIMUOVI E AGGIORNA I SERVIZI HELM
+      # AGGIORNA I SERVIZI HELM
       # ============================================
-
-      - name: Rimuovi eventuali servizi precedenti non gestiti da HELM
-        run: |
-          microk8s kubectl delete service ${{ env.IMAGE_NAME }}-service --namespace=${{ env.K8S_NAMESPACE }} --ignore-not-found
-          microk8s kubectl delete deployment ${{ env.IMAGE_NAME }}-deployment --namespace=${{ env.K8S_NAMESPACE }} --ignore-not-found
-          microk8s kubectl delete ingress ${{ env.IMAGE_NAME }}-ingress --namespace=${{ env.K8S_NAMESPACE }} --ignore-not-found
 
       - name: Deploy Helm Charts
         run: |
@@ -289,123 +283,11 @@ jobs:
           helm upgrade --install ${{ env.IMAGE_NAME }} ./helm \
               --namespace=${{ env.K8S_NAMESPACE }} \
               --set environment=${{ env.ENVIRONMENT }} \
-              --set registry=${{ env.REGISTRY }}
+              --set registry=${{ env.REGISTRY }} \
+              --set image.tag=${{ github.sha }} \
+              --values ./helm/values-${{ env.ENVIRONMENT }}.yaml
 
-      # ============================================
-      # APPLICAZIONE CONFIGMAP E SECRET PER AMBIENTE
-      # ============================================
-      - name: Applicazione ConfigMaps e Secrets
-        run: |
-          echo "🔧 Applying ConfigMaps and Secrets for environment: ${{ env.ENVIRONMENT }}..."
-          
-          # Determina l'ambiente (default: development se non specificato)
-          DEPLOY_ENV="${{ env.ENVIRONMENT }}"
-          if [ -z "$DEPLOY_ENV" ]; then
-            DEPLOY_ENV="development"
-          fi
-          echo "📋 Using environment: $DEPLOY_ENV"
-          
-          # Applica ConfigMap per l'ambiente specifico
-          if [ -f "k8s/configmaps/configmap-${DEPLOY_ENV}.yaml" ]; then
-            echo "📝 Applying ConfigMap for $DEPLOY_ENV..."
-            microk8s kubectl apply -f k8s/configmaps/configmap-${DEPLOY_ENV}.yaml
-          elif [ -f "k8s/configmaps/configmap-dev.yaml" ] && [ "$DEPLOY_ENV" = "development" ]; then
-            echo "📝 Applying ConfigMap for development (dev variant)..."
-            microk8s kubectl apply -f k8s/configmaps/configmap-dev.yaml
-          else
-            echo "⚠️ ConfigMap file not found for environment: $DEPLOY_ENV"
-            echo "Expected: k8s/configmaps/configmap-${DEPLOY_ENV}.yaml"
-            echo "Available files:"
-            ls -la k8s/configmaps/ || echo "ConfigMaps directory not found"
-          fi
-          
-          # Applica Secret per l'ambiente specifico (se esiste)
-          if [ -f "k8s/secrets/secret-${DEPLOY_ENV}.yaml" ]; then
-            echo "🔐 Applying Secret for $DEPLOY_ENV..."
-            microk8s kubectl apply -f k8s/secrets/secret-${DEPLOY_ENV}.yaml
-          elif [ -f "k8s/secrets/secret-dev.yaml" ] && [ "$DEPLOY_ENV" = "development" ]; then
-            echo "🔐 Applying Secret for development (dev variant)..."
-            microk8s kubectl apply -f k8s/secrets/secret-dev.yaml
-          else
-            echo "⚠️ Secret file not found for environment: $DEPLOY_ENV (this might be OK if no secrets are needed)"
-          fi
-          
-          # Verifica che ConfigMap e Secret siano stati creati
-          echo "✅ Verifying applied resources..."
-          microk8s kubectl get configmap -n ${{ env.K8S_NAMESPACE }} | grep ${{ env.IMAGE_NAME }} || echo "No ConfigMaps found"
-          microk8s kubectl get secret -n ${{ env.K8S_NAMESPACE }} | grep ${{ env.IMAGE_NAME }} || echo "No Secrets found"
-          
-          echo "✅ ConfigMaps and Secrets applied successfully"
-
-      # ============================================
-      # VALIDAZIONE FILE YAML PER K8S
-      # ============================================
-      - name: Validazione dei Manifest Kubernetes
-        run: |
-          echo "🔍 Validating manifests..."
-          
-          # Dry-run per validare i manifest
-          microk8s kubectl apply -f k8s/deployment.yaml --dry-run=client
-          microk8s kubectl apply -f k8s/service-cluster.yaml --dry-run=client
-          microk8s kubectl apply -f k8s/ingress.yaml --dry-run=client
-          
-          echo "✅ Manifests are valid"
-
-      # ============================================
-      # PULIZIA INIZIALE
-      # ============================================
-      - name: Clean Kubernetes Manifests
-        run: |
-          echo "📋 Cleaning Kubernetes manifests..."
-          
-          # Applica e rimuove  i manifest 
-          microk8s kubectl delete -f k8s/deployment.yaml --namespace=${{ env.K8S_NAMESPACE }} || true 
-          microk8s kubectl delete -f k8s/service-cluster.yaml --namespace=${{ env.K8S_NAMESPACE }}  || true
-          microk8s kubectl delete -f k8s/ingress.yaml --namespace=${{ env.K8S_NAMESPACE }}  || true
-
-      # ============================================
-      # APPLICAZIONE DEPLOYMENT
-      # ============================================
-      - name: Apply Kubernetes Manifests
-        run: |
-          echo "📋 Applying Kubernetes manifests..."
-          
-          # Applica i manifest con annotazioni per tracking
-          microk8s kubectl apply -f k8s/deployment.yaml \
-            --namespace=${{ env.K8S_NAMESPACE }} \
-            --record
-          
-          microk8s kubectl apply -f k8s/service-cluster.yaml \
-            --namespace=${{ env.K8S_NAMESPACE }}
-          
-          microk8s kubectl apply -f k8s/ingress.yaml \
-            --namespace=${{ env.K8S_NAMESPACE }}
-          
-          echo "✅ Manifests applied successfully"
-
-      # ============================================
-      # AGGIORNAMENTO IMMAGINE - ZERO DOWNTIME
-      # ============================================
-      - name: Update Deployment Image
-        run: |
-          echo "🚀 Updating deployment with new image..."
-          
-          # Aggiorna l'immagine del deployment
-          microk8s kubectl set image deployment/${{ env.IMAGE_NAME }}-deployment \
-            webapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            --namespace=${{ env.K8S_NAMESPACE }} \
-            --record
-          
-          # Annota il deployment con metadata del deploy
-          microk8s kubectl annotate deployment/${{ env.IMAGE_NAME }}-deployment \
-            deployment.kubernetes.io/revision-history-limit=10 \
-            app.kubernetes.io/version=${{ github.sha }} \
-            app.kubernetes.io/deployed-by="github-actions" \
-            app.kubernetes.io/deployed-at="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            --namespace=${{ env.K8S_NAMESPACE }} \
-            --overwrite
-
-      # ============================================
+       # ============================================
       # MONITORAGGIO ROLLOUT - CRITICO
       # ============================================
       - name: Wait for Rollout Completion
