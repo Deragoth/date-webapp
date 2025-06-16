@@ -7,7 +7,7 @@ config:
   ENV: development
   JAVA_OPTS: "-Xmx512m -Xms256m"
   APP_VERSION: "1.0.0"
-  customText: "Hello from production config!"
+  customText: "Hello from development config!"
 
   # Database
   DATABASE_URL: "jdbc:mysql://dev-db:3306/myapp_dev"
