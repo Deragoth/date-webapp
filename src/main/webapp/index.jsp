@@ -41,9 +41,95 @@
             System.out.println("               apiBaseurl     = " + apiBaseUrl);
             System.out.println("               appEnvironment = " + appEnvironment);
         %>
-        <p><b>Debug contenuto apiBaseUrl:</b> <%=apiBaseUrl%></p>
-        <p><b>Debug contenuto appEnvironment:</b> <%=appEnvironment%></p>
-        <p><b>Debug contenuto fileContent:</b> <%=debugFileContent%></p>
+       <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Proprietà</th>
+                        <th>Valore</th>
+                        <th>Proprietà</th>
+                        <th>Valore</th>
+                        <th>Proprietà</th>
+                        <th>Valore</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="property-cell">APP_VERSION</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("APP_VERSION");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                        <td class="property-cell">DATABASE_URL</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("DATABASE_URL");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                        <td class="property-cell">DATABASE_PASSWORD</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("DATABASE_PASSWORD");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="property-cell">APP_ENVIRONMENT</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("APP_ENVIRONMENT");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                        <td class="property-cell">DATABASE_DRIVER</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("DATABASE_DRIVER");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                        <td class="property-cell">JWT_SECRET</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("JWT_SECRET");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="property-cell">LOG_LEVEL</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("LOG_LEVEL");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                        <td class="property-cell">JAVA_OPTS</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("JAVA_OPTS");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                        <td class="property-cell">API_KEY</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("API_KEY");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="property-cell">apiBaseUrl</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("APP_ENVIRONMENT");%>
+                            <span class="badge badge-url">API</span>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="property-cell">appEnvironment</td>
+                        <td class="value-cell">
+                            <%=request.getAttribute("APP_ENVIRONMENT");%>
+                            <span class="badge badge-dev">DEV</span>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <h2>Contenuto del file:</h2>
         <div id="fileContent">
