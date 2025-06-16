@@ -113,6 +113,15 @@ jobs:
       image-digest: ${{ steps.build.outputs.digest }}       # variabile usata in step successivi
     steps:
 
+      # ============================================
+      # Controlli
+      # ============================================
+      - name: Verifica iniziale
+        run: |
+          echo "env...${{ env.ENVIRONMENT }}"
+          echo "out...${{ needs.build-and-test.outputs.ENVIRONMENT }}"
+
+
       #**********************************************
       # Checkout del codice per Docker
       #**********************************************
