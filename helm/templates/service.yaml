@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: date-webapp-service
+  name: {{ .Values.APP_NAME }}-service
   namespace: {{ .Values.namespace }}
   labels:
-    app: date-webapp
+    app: {{ .Values.APP_NAME }}
     environment: {{ .Values.config.APP_ENVIRONMENT }}
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: "{{ .Release.Name }}"
@@ -16,7 +16,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: date-webapp
+    app: {{ .Values.APP_NAME }}
   ports:
     - name: http
       protocol: TCP

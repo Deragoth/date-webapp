@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: date-webapp-config
+  name: {{ .Values.APP_NAME }}-config
   namespace: {{ .Values.namespace }}
   labels:
-    app: date-webapp
+    app: {{ .Values.APP_NAME }}
     environment: {{ .Values.config.APP_ENVIRONMENT }}
 data:
   ENV: {{ .Values.config.ENV | quote }}

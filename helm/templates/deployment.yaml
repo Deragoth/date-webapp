@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: date-webapp-deployment
+  name: {{ .Values.APP_NAME }}-deployment
   namespace: {{ .Values.namespace }}
   labels:
-    app: date-webapp
+    app: {{ .Values.APP_NAME }}
     environment: {{ .Values.config.APP_ENVIRONMENT }}
     version: v1
 spec:
@@ -16,11 +16,11 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: date-webapp
+      app: {{ .Values.APP_NAME }}
   template:
     metadata:
       labels:
-        app: date-webapp
+        app: {{ .Values.APP_NAME }}
         environment: {{ .Values.config.APP_ENVIRONMENT }}
         version: v1
       annotations:
@@ -42,9 +42,9 @@ spec:
               name: http
           envFrom:
             - configMapRef:
-                name: date-webapp-config
+             name: {{ .Values.APP_NAME }}-config
             - secretRef:
-                name: date-webapp-secrets
+                name: {{ .Values.APP_NAME }}-secrets
           env:
             - name: JAVA_OPTS
               value: {{ .Values.config.JAVA_OPTS | quote }}

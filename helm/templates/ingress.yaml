@@ -1,10 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: date-webapp-ingress
+  name: {{ .Values.APP_NAME }}-ingress
   namespace: {{ .Values.namespace }}
   labels:
-    app: date-webapp
+    app: {{ .Values.APP_NAME }}
     environment: {{ .Values.config.APP_ENVIRONMENT }}
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: "{{ .Release.Name }}"
@@ -23,6 +23,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: date-webapp-service
+                name: {{ .Values.APP_NAME }}-service
                 port:
                   number: 8080
