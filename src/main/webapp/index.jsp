@@ -16,7 +16,7 @@
         <h1>Applicazione Data</h1>
 
         <p>
-            Data di caricamento della pagina - Versione 5:
+            Data di caricamento della pagina - Versione 6:
             <%= LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) %>
         </p>
 
