@@ -206,7 +206,7 @@ jobs:
           exit-code: '0'
 
   deploy-to-microk8s:
-    needs: docker-build-push
+    needs: [build-and-test,docker-build-push]
     runs-on: self-hosted
 
     # Agiunta variabile d'ambiente
