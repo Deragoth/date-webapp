@@ -47,7 +47,18 @@ public class FileHandlerServlet extends HttpServlet {
 
         // Legge le variabili d'ambiente
         request.setAttribute("API_BASE_URL", AppConfig.API_BASE_URL);
+        request.setAttribute("JAVA_OPTS", AppConfig.JAVA_OPTS);
         request.setAttribute("APP_ENVIRONMENT", AppConfig.APP_ENVIRONMENT);
+        request.setAttribute("APP_VERSION", AppConfig.APP_VERSION);
+        request.setAttribute("customText", AppConfig.customText);
+        request.setAttribute("DATABASE_URL", AppConfig.DATABASE_URL);
+        request.setAttribute("DATABASE_DRIVER", AppConfig.DATABASE_DRIVER);
+        request.setAttribute("LOG_LEVEL", AppConfig.LOG_LEVEL);
+        request.setAttribute("ENABLE_DEBUG_MODE", AppConfig.ENABLE_DEBUG_MODE);
+        request.setAttribute("ENABLE_CACHE", AppConfig.ENABLE_CACHE);
+        request.setAttribute("DATABASE_PASSWORD", AppConfig.DATABASE_PASSWORD);
+        request.setAttribute("JWT_SECRET", AppConfig.JWT_SECRET);
+        request.setAttribute("API_KEY", AppConfig.API_KEY);
 
         // Inoltra la richiesta alla JSP
         request.getRequestDispatcher("/index.jsp").forward(request, response);

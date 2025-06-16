@@ -7,16 +7,18 @@ public class AppConfig {
     public static final String DATABASE_URL = getEnvOrDefault("DATABASE_URL", "jdbc:mysql://localhost:3306/myapp");
     public static final String DATABASE_DRIVER = getEnvOrDefault("DATABASE_DRIVER", "com.mysql.cj.jdbc.Driver");
     public static final String DATABASE_PASSWORD = getEnvOrDefault("DATABASE_PASSWORD", "");
+    public static final String JWT_SECRET = getEnvOrDefault("JWT_SECRET", "");
+    public static final String API_KEY = getEnvOrDefault("API_KEY", "");
 
     // Application Configuration
     public static final String APP_ENVIRONMENT = getEnvOrDefault("APP_ENVIRONMENT", "development");
     public static final String LOG_LEVEL = getEnvOrDefault("LOG_LEVEL", "INFO");
-    public static final String SERVER_PORT = getEnvOrDefault("SERVER_PORT", "8080");
+    public static final String JAVA_OPTS = getEnvOrDefault("JAVA_OPTS", "");
+    public static final String customText = getEnvOrDefault("customText", "");
 
     // External Services
     public static final String API_BASE_URL = getEnvOrDefault("API_BASE_URL", "http://localhost:3000");
-    public static final String REDIS_HOST = getEnvOrDefault("REDIS_HOST", "localhost");
-    public static final String REDIS_PORT = getEnvOrDefault("REDIS_PORT", "6379");
+    public static final String APP_VERSION = getEnvOrDefault("APP_VERSION", "");
 
     // Feature Flags
     public static final boolean ENABLE_DEBUG_MODE = Boolean.parseBoolean(getEnvOrDefault("ENABLE_DEBUG_MODE", "false"));
