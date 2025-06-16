@@ -27,7 +27,7 @@
         <!-- Form per scrivere testo nel file -->
         <form method="post" action="home">
             <label for="inputText">Inserisci del testo:</label><br>
-            <input type="text" id="inputText" name="textInput" required placeholder="Scrivi qualcosa..."><br><br>
+            <input type="text" id="inputText" name="textInput" placeholder="Scrivi qualcosa..."><br><br>
             <button type="submit" name="action" value="write">Aggiungi nel file</button>
             <button type="submit" name="action" value="clear">Svuota File</button>
         </form>
@@ -37,7 +37,9 @@
             Object appEnvironment = request.getAttribute("APP_ENVIRONMENT");
             System.out.println("               appEnvironment = " + appEnvironment);
         %>
-       <div class="table-container">
+        <br/>
+
+        <div class="table-container">
             <table>
                 <thead>
                     <tr>
